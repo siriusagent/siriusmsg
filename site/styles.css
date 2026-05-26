@@ -422,6 +422,17 @@ h3 {
   color: var(--muted);
 }
 
+.text-link {
+  display: inline-flex;
+  margin-top: 1rem;
+  color: var(--blue);
+  font-weight: 760;
+}
+
+.text-link:hover {
+  color: var(--green-dark);
+}
+
 .release-band {
   background: var(--amber-soft);
 }

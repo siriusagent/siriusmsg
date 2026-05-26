@@ -52,6 +52,9 @@ The website documents the current consumer surfaces:
 - `SiriusMsgKit` for Swift clients that connect to the authenticated local service
 - bundled `siriusmsg` Python adapter package for async handler authors
 - local protocol boundary for non-Swift clients
+- [Sirius Agent integration pattern](docs/sirius-agent-integration.md), a
+  sanitized reference for wiring an agent runtime without publishing private
+  Sirius internals
 
 SDK consumers receive sanitized events and return adapter decisions. SiriusMsg
 keeps Messages permissions, service auth, cursor progress, ACK policy, reply
