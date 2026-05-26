@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SiriusMsg is a signed local Apple Messages bridge for AI agents on macOS.">
+  <meta property="og:title" content="SiriusMsg">
+  <meta property="og:description" content="A signed local Apple Messages bridge for AI agents on macOS.">
+  <meta property="og:image" content="assets/siriusmsg-icon.png">
+  <meta name="theme-color" content="#f7faf7">
+  <title>SiriusMsg - Local Messages bridge for AI agents</title>
+  <link rel="icon" href="assets/siriusmsg-icon.png">
+  <link rel="apple-touch-icon" href="assets/siriusmsg-icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header" aria-label="Primary">
+    <a class="brand" href="#top" aria-label="SiriusMsg home">
+      <img src="assets/siriusmsg-icon.png" width="36" height="36" alt="">
+      <span>SiriusMsg</span>
+    </a>
+    <nav class="nav-links" aria-label="Site">
+      <a href="#privacy">Privacy</a>
+      <a href="#integrations">Integrations</a>
+      <a href="#release">Release</a>
+      <a class="nav-download" href="https://github.com/siriusagent/siriusmsg/releases/latest/download/SiriusMsg-notarized.dmg">Download DMG</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-inner">
+        <img class="hero-icon" src="assets/siriusmsg-icon.png" width="140" height="140" alt="SiriusMsg app icon">
+        <p class="eyebrow">Developer ID macOS app plus background agent</p>
+        <h1 id="hero-title">SiriusMsg</h1>
+        <p class="hero-copy">A signed local Apple Messages bridge that lets humans start AI agent turns from Messages while the Mac app owns setup, permissions, allowlists, health, and adapter status.</p>
+        <div class="hero-actions" aria-label="Download and release links">
+          <a class="button primary" href="https://github.com/siriusagent/siriusmsg/releases/latest/download/SiriusMsg-notarized.dmg">Download DMG</a>
+          <a class="button secondary" href="https://github.com/siriusagent/siriusmsg/releases/latest">View latest release</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section product-band" aria-labelledby="product-title">
+      <div class="section-inner">
+        <div class="section-lede">
+          <p class="eyebrow">Built for the real local Mac path</p>
+          <h2 id="product-title">The app is the product surface.</h2>
+          <p>SiriusMsg is not a terminal script, webhook proxy, or iMessage protocol clone. The signed app guides setup, and the bundled agent owns local receive/send work.</p>
+        </div>
+        <dl class="release-facts" aria-label="Release facts">
+          <div>
+            <dt>Platform</dt>
+            <dd>macOS 15+</dd>
+          </div>
+          <div>
+            <dt>Artifact</dt>
+            <dd>Notarized DMG</dd>
+          </div>
+          <div>
+            <dt>Updates</dt>
+            <dd>Signed Sparkle appcast</dd>
+          </div>
+        </dl>
+        <div class="feature-grid">
+          <article class="feature">
+            <span class="feature-index">01</span>
+            <h3>App-owned setup</h3>
+            <p>Onboarding, Full Disk Access guidance, Messages Automation checks, login item control, allowed chats, adapter setup, health, and logs stay in the Mac app.</p>
+          </article>
+          <article class="feature">
+            <span class="feature-index">02</span>
+            <h3>Local agent boundary</h3>
+            <p>One signed background agent owns read-only cursor state, local service auth, event delivery, SwiftPython hooks, and reply sending.</p>
+          </article>
+          <article class="feature">
+            <span class="feature-index">03</span>
+            <h3>Consumer API</h3>
+            <p>Agent stacks integrate through the authenticated local service, SiriusMsgKit, or the bundled Python adapter package instead of reading private Messages state.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="privacy" class="section privacy-band" aria-labelledby="privacy-title">
+      <div class="section-inner split-layout">
+        <div class="section-lede">
+          <p class="eyebrow">Privacy defaults</p>
+          <h2 id="privacy-title">Closed until you allow a chat.</h2>
+          <p>Messages are sensitive local data. SiriusMsg starts with no chats allowed and keeps the privileged Messages core native Swift.</p>
+        </div>
+        <div class="check-list" role="list">
+          <div role="listitem">Read-only receive from the local Messages database.</div>
+          <div role="listitem">Send through Messages.app targeted by <code>com.apple.MobileSMS</code>.</div>
+          <div role="listitem">Explicit allowed chats, with no all-chats mode in v1.</div>
+          <div role="listitem">No message-body logs or raw database rows for hooks.</div>
+          <div role="listitem">Dispatch and read-only send confirmation are separate facts.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="integrations" class="section integration-band" aria-labelledby="integrations-title">
+      <div class="section-inner">
+        <div class="section-lede compact">
+          <p class="eyebrow">For agent stacks</p>
+          <h2 id="integrations-title">Bring your handler, not your own Messages permission prompts.</h2>
+          <p>SiriusMsg centralizes protected local Messages access so adapters can focus on ordinary agent behavior.</p>
+        </div>
+        <div class="integration-rows">
+          <article>
+            <h3>Swift</h3>
+            <p>Use SiriusMsgKit to subscribe to events, send replies, read health, and configure allowed chats through the same local protocol.</p>
+          </article>
+          <article>
+            <h3>Python</h3>
+            <p>Use the bundled <code>siriusmsg</code> adapter package hosted by SwiftPython inside the signed agent process.</p>
+          </article>
+          <article>
+            <h3>Local protocol</h3>
+            <p>Connect over the authenticated service boundary for non-Swift clients, with backpressure, ACKs, health, and VM-access mode.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="release" class="section release-band" aria-labelledby="release-title">
+      <div class="section-inner release-layout">
+        <div class="section-lede">
+          <p class="eyebrow">Release path</p>
+          <h2 id="release-title">Install the signed DMG, then validate setup from the app.</h2>
+          <p>The public artifact is the notarized DMG. Readiness checks run from the signed app and bundled agent, not shell-only probes.</p>
+        </div>
+        <ol class="steps">
+          <li>
+            <span>1</span>
+            <p>Download the latest notarized DMG from GitHub Releases.</p>
+          </li>
+          <li>
+            <span>2</span>
+            <p>Open SiriusMsg and follow guided setup for Full Disk Access and Messages Automation.</p>
+          </li>
+          <li>
+            <span>3</span>
+            <p>Add only the Messages conversations agents should receive.</p>
+          </li>
+          <li>
+            <span>4</span>
+            <p>Run readiness checks and connect a Swift or Python adapter.</p>
+          </li>
+        </ol>
+        <div class="release-actions">
+          <a class="button primary" href="https://github.com/siriusagent/siriusmsg/releases/latest/download/SiriusMsg-notarized.dmg">Download DMG</a>
+          <a class="button secondary" href="https://github.com/siriusagent/siriusmsg/releases/latest">Release notes</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <img src="assets/siriusmsg-icon.png" width="32" height="32" alt="">
+      <strong>SiriusMsg</strong>
+    </div>
+    <p>A local Apple Messages bridge for serious AI agents on macOS.</p>
+  </footer>
+</body>
+</html>

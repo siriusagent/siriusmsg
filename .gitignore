@@ -1,0 +1,13 @@
+.DS_Store
+.env
+.env.*
+*.dmg
+*.zip
+*.p12
+*.p8
+*.mobileprovision
+*.cer
+*.key
+*.pem
+*.log
+node_modules/
