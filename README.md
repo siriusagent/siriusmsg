@@ -45,6 +45,18 @@ keeps adapter integrations behind the signed app and agent boundary. The app and
 agent should not log message bodies, expose raw database rows to adapters, or
 offer an all-chats mode in v1.
 
+## SDK
+
+The website documents the current consumer surfaces:
+
+- `SiriusMsgKit` for Swift clients that connect to the authenticated local service
+- bundled `siriusmsg` Python adapter package for async handler authors
+- local protocol boundary for non-Swift clients
+
+SDK consumers receive sanitized events and return adapter decisions. SiriusMsg
+keeps Messages permissions, service auth, cursor progress, ACK policy, reply
+sending, and send confirmation inside the signed app and agent boundary.
+
 ## Release Files
 
 Each public release should include:

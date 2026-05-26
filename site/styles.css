@@ -302,7 +302,9 @@ h3 {
 }
 
 .feature,
-.integration-rows article {
+.integration-rows article,
+.sdk-panel,
+.sdk-contract {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbfdfb;
@@ -318,7 +320,8 @@ h3 {
 }
 
 .feature p,
-.integration-rows p {
+.integration-rows p,
+.sdk-panel p {
   margin: 0.75rem 0 0;
   color: var(--muted);
 }
@@ -358,6 +361,65 @@ h3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
   margin-top: 2rem;
+}
+
+.sdk-band {
+  background: var(--white);
+}
+
+.sdk-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.sdk-panel {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.sdk-label {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  color: var(--blue);
+  font-size: 0.75rem;
+  font-weight: 840;
+  text-transform: uppercase;
+}
+
+.code-sample {
+  max-width: 100%;
+  margin: 0;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #17211b;
+  color: #f4f8f4;
+  padding: 1rem;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.code-sample code {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+.sdk-contract {
+  margin-top: 1rem;
+}
+
+.sdk-contract ul {
+  display: grid;
+  gap: 0.72rem;
+  margin: 0.9rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
 }
 
 .release-band {
@@ -462,6 +524,7 @@ h3 {
   .feature-grid,
   .split-layout,
   .integration-rows,
+  .sdk-layout,
   .release-layout {
     grid-template-columns: 1fr;
   }

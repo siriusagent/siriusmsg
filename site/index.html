@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="SiriusMsg is a signed local Apple Messages bridge for AI agents on macOS.">
+  <meta name="description" content="SiriusMsg is a signed local Apple Messages bridge and SDK surface for AI agents on macOS.">
   <meta property="og:title" content="SiriusMsg">
-  <meta property="og:description" content="A signed local Apple Messages bridge for AI agents on macOS.">
+  <meta property="og:description" content="A signed local Apple Messages bridge and SDK surface for AI agents on macOS.">
   <meta property="og:image" content="assets/siriusmsg-icon.png">
   <meta name="theme-color" content="#f7faf7">
   <title>SiriusMsg - Local Messages bridge for AI agents</title>
@@ -22,6 +22,7 @@
     <nav class="nav-links" aria-label="Site">
       <a href="#privacy">Privacy</a>
       <a href="#integrations">Integrations</a>
+      <a href="#sdk">SDK</a>
       <a href="#release">Release</a>
       <a class="nav-download" href="https://github.com/siriusagent/siriusmsg/releases/latest/download/SiriusMsg-notarized.dmg">Download DMG</a>
     </nav>
@@ -119,6 +120,68 @@
             <h3>Local protocol</h3>
             <p>Connect over the authenticated service boundary for non-Swift clients, with backpressure, ACKs, health, and VM-access mode.</p>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="sdk" class="section sdk-band" aria-labelledby="sdk-title">
+      <div class="section-inner">
+        <div class="section-lede compact">
+          <p class="eyebrow">SDK surface</p>
+          <h2 id="sdk-title">Use the local bridge from Swift, Python, or the service protocol.</h2>
+          <p>SiriusMsg owns Messages permissions, allowlists, cursor progress, durable ACKs, reply sending, and send confirmation. SDK consumers receive sanitized events and return adapter decisions.</p>
+        </div>
+        <div class="sdk-layout">
+          <article class="sdk-panel">
+            <div>
+              <span class="sdk-label">Swift</span>
+              <h3>SiriusMsgKit</h3>
+              <p>Connect to the authenticated local service, read health, subscribe to allowlisted events, send replies, ACK delivered turns, rotate auth tokens, and fetch opted-in attachment bytes.</p>
+            </div>
+            <pre class="code-sample"><code>let client = try await SiriusMsgClient.connect()
+let health = try await client.health()
+
+for try await event in client.subscribe(
+  reconnectPolicy: .default,
+  supportsAttachments: true
+) {
+  guard let message = event.message else { continue }
+
+  let result = try await client.send(
+    SiriusMsgSendRequest(
+      chatID: message.chatID,
+      text: "Handled by my agent."
+    )
+  )
+
+  if result.accepted, let ack = event.ack {
+    try await client.ack(ack)
+  }
+}</code></pre>
+          </article>
+          <article class="sdk-panel">
+            <div>
+              <span class="sdk-label">Python</span>
+              <h3>Bundled <code>siriusmsg</code> adapter package</h3>
+              <p>Write an async handler. SwiftPython hosts it inside the signed agent boundary while Swift keeps socket auth, Apple Messages access, ACK policy, retries, and reply dispatch.</p>
+            </div>
+            <pre class="code-sample"><code>from siriusmsg import adapter
+
+
+@adapter.on_message
+async def handle(ctx):
+    result = await my_agent(ctx.message.text)
+    return ctx.reply(result)</code></pre>
+          </article>
+        </div>
+        <div class="sdk-contract">
+          <h3>Adapter contract</h3>
+          <ul>
+            <li>Handlers receive typed message context, attachment metadata, attempt state, and constrained health/capability callbacks.</li>
+            <li>Handlers return handled, reply, retry, or dead-letter decisions; Swift performs the actual send and confirmation.</li>
+            <li>Adapters do not receive raw database rows, AppleEvents handles, service tokens, Keychain handles, or Apple-owned attachment paths.</li>
+            <li>Hermes, OpenClaw, and other runtimes should consume this boundary through their normal runtime or gateway APIs, with their own integration tests before compatibility claims.</li>
+          </ul>
         </div>
       </div>
     </section>
