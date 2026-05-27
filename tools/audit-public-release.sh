@@ -2,6 +2,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+EXPECTED_SUPUBLICEDKEY="${SIRIUSMSG_EXPECTED_SUPUBLICEDKEY:-Ca3XatMgF76tQutzr7TyLJ8BEP8WyeFNVAM0DSNKYvQ=}"
+EXPECTED_APPCAST_URL="${SIRIUSMSG_EXPECTED_APPCAST_URL:-https://updates.bestbyteai.com/siriusmsg/appcast.xml}"
 FAILED=0
 
 fail() {
@@ -16,7 +18,72 @@ print_matches() {
   "$@" >&2 || true
 }
 
+detach_release_dmg() {
+  local mount_point="$1"
+  hdiutil detach "$mount_point" >/dev/null 2>&1 || \
+    hdiutil detach -force "$mount_point" >/dev/null 2>&1 || true
+}
+
+inspect_release_dmg() {
+  local dmg_path="${SIRIUSMSG_RELEASE_DMG:-}"
+  if [[ -z "$dmg_path" ]]; then
+    return
+  fi
+  if [[ ! -f "$dmg_path" ]]; then
+    fail "SIRIUSMSG_RELEASE_DMG does not exist: $dmg_path"
+    return
+  fi
+
+  local attach_output mount_point info_plist public_key appcast_url
+  if ! attach_output="$(hdiutil attach -nobrowse -readonly "$dmg_path" 2>&1)"; then
+    printf '%s\n' "$attach_output" >&2
+    fail "could not attach release DMG"
+    return
+  fi
+
+  mount_point="$(
+    printf '%s\n' "$attach_output" | awk '/\/Volumes\// {
+      for (i = 3; i <= NF; i++) {
+        printf "%s%s", (i == 3 ? "" : " "), $i
+      }
+      printf "\n"
+      exit
+    }'
+  )"
+
+  if [[ -z "$mount_point" || ! -d "$mount_point" ]]; then
+    printf '%s\n' "$attach_output" >&2
+    fail "could not find mounted release DMG volume"
+    return
+  fi
+
+  info_plist="$(find "$mount_point" -maxdepth 3 -path '*/SiriusMsg.app/Contents/Info.plist' -print -quit)"
+  if [[ -z "$info_plist" ]]; then
+    fail "release DMG does not contain SiriusMsg.app/Contents/Info.plist"
+    detach_release_dmg "$mount_point"
+    return
+  fi
+
+  if ! public_key="$(/usr/libexec/PlistBuddy -c 'Print :SUPublicEDKey' "$info_plist" 2>/dev/null)"; then
+    fail "release DMG app Info.plist is missing SUPublicEDKey"
+  elif [[ -z "$public_key" || "$public_key" == *REPLACE_WITH_RELEASE_SPARKLE_EDDSA_PUBLIC_KEY* ]]; then
+    fail "release DMG app Info.plist still has a placeholder SUPublicEDKey"
+  elif [[ "$public_key" != "$EXPECTED_SUPUBLICEDKEY" ]]; then
+    fail "release DMG app Info.plist has unexpected SUPublicEDKey"
+  fi
+
+  if ! appcast_url="$(/usr/libexec/PlistBuddy -c 'Print :SUFeedURL' "$info_plist" 2>/dev/null)"; then
+    fail "release DMG app Info.plist is missing SUFeedURL"
+  elif [[ "$appcast_url" != "$EXPECTED_APPCAST_URL" ]]; then
+    fail "release DMG app Info.plist has unexpected SUFeedURL: $appcast_url"
+  fi
+
+  detach_release_dmg "$mount_point"
+}
+
 cd "$ROOT_DIR"
+
+inspect_release_dmg
 
 if [[ ! -f "site/index.html" ]]; then
   fail "site/index.html is missing"
