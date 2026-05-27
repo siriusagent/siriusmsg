@@ -28,10 +28,9 @@ The latest release page is:
 https://github.com/siriusagent/siriusmsg/releases/latest
 ```
 
-Build 2 update note: this first public DMG must be updated by downloading a
-newer DMG from GitHub Releases. It does not receive in-app Sparkle updates.
-Subsequent public builds must pass the release-DMG Sparkle key audit before
-publication.
+Build 2 replacement note: the original May 26 DMG was replaced on May 27 with a
+fresh notarized DMG that contains the release Sparkle public key. New downloads
+from the latest release URL receive the corrected app bundle.
 
 ## Requirements
 
@@ -72,7 +71,7 @@ Each public release should include:
 - `SiriusMsg-notarized.dmg`
 - `SiriusMsg-notarized.dmg.sha256`
 - release notes
-- appcast metadata for builds that support Sparkle updates
+- appcast metadata for Sparkle updates
 
 Verify the checksum after download:
 
