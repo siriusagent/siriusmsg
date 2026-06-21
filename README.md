@@ -31,9 +31,9 @@ The latest release page is:
 https://github.com/siriusagent/siriusmsg/releases/latest
 ```
 
-Build 2 replacement note: the original May 26 DMG was replaced on May 27 with a
-fresh notarized DMG that contains the release Sparkle public key. New downloads
-from the latest release URL receive the corrected app bundle.
+The `latest` links resolve to the current notarized public release. Older build
+replacement notes are kept on their historical GitHub Release pages, not in this
+top-level README.
 
 ## Requirements
 
@@ -95,7 +95,6 @@ update; non-Swift consumers should use the Python or TypeScript SDKs above.
 Each public release should include:
 
 - `SiriusMsg-notarized.dmg`
-- `SiriusMsg-notarized.dmg.sha256`
 - release notes
 - appcast metadata for Sparkle updates
 
@@ -105,7 +104,8 @@ Verify the checksum after download:
 shasum -a 256 SiriusMsg-notarized.dmg
 ```
 
-Compare the output with `SiriusMsg-notarized.dmg.sha256` from the same release.
+Compare the output with the checksum printed in the matching GitHub Release
+notes or appcast publication notes.
 
 ## Website
 
