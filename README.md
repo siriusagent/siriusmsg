@@ -1,21 +1,9 @@
 # SiriusMsg
 
 SiriusMsg is a signed macOS app and background agent that bridges Apple Messages
-to AI agents through a local, allowlist-gated service.
-
-This public repository is for release distribution:
-
-- GitHub Pages website
-- notarized DMG downloads through GitHub Releases
-- release notes and checksums
-- security and install information
-- public local-protocol schema, golden frames, SDK packages, and integration docs
-
-The signed app, agent, Store, Automation, and release-signing source live in the
-private development repository. This public repository may contain SDK client
-source and protocol fixtures, but it must not contain private app or agent
-source, signing material, Apple credentials, private service tokens, local
-database files, or generated operational evidence from a developer machine.
+to AI agents through a local, allowlist-gated service. Install the app, allow
+only the conversations you choose, then integrate your agent through the local
+protocol SDKs in this repository.
 
 ## Download
 
@@ -30,10 +18,6 @@ The latest release page is:
 ```text
 https://github.com/siriusagent/siriusmsg/releases/latest
 ```
-
-The `latest` links resolve to the current notarized public release. Older build
-replacement notes are kept on their historical GitHub Release pages, not in this
-top-level README.
 
 ## Requirements
 
@@ -86,39 +70,22 @@ npm --prefix Packages/typescript/siriusmsg-sdk ci
 npm --prefix Packages/typescript/siriusmsg-sdk run build
 ```
 
-The Swift client library, `SiriusMsgKit`, is part of the signed app and private
-source tree today. Public Swift package publication is separate from this repo
-update; non-Swift consumers should use the Python or TypeScript SDKs above.
+The Swift client library, `SiriusMsgKit`, is not published as a public SwiftPM
+package yet. Use Python or TypeScript today; Swift package publication is the
+next SDK surface to split out.
 
-## Release Files
-
-Each public release should include:
-
-- `SiriusMsg-notarized.dmg`
-- release notes
-- appcast metadata for Sparkle updates
-
-Verify the checksum after download:
+## Verify Download
 
 ```sh
 shasum -a 256 SiriusMsg-notarized.dmg
 ```
 
 Compare the output with the checksum printed in the matching GitHub Release
-notes or appcast publication notes.
+notes.
 
-## Website
+## Security
 
-The GitHub Pages site is stored in `site/` and deployed by the Pages workflow.
-
-Local preview:
-
-```sh
-python3 -m http.server 4173 -d site
-```
-
-Open:
-
-```text
-http://127.0.0.1:4173/
-```
+Report security issues through the process in [SECURITY.md](SECURITY.md).
+Do not file public issues containing message bodies, chat identifiers, auth
+tokens, local database files, crash logs with private payloads, or other
+sensitive local data.
