@@ -1,0 +1,1 @@
+{"kind":"sendResult","protocolVersion":1,"requestID":"send-text","sendResult":{"accepted":true,"confirmationState":"confirmed","platformMessageID":"platform-1","resolvedContent":{"kind":"text","text":"hello"}}}

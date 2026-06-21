@@ -1,0 +1,1 @@
+{"kind":"send","protocolVersion":1,"requestID":"send-attachment","sendRequest":{"chatID":"SMS;-;+15555550100","content":{"attachment":{"byteCount":12,"displayName":"review.pdf","fileURL":"file:///tmp/siriusmsg-sdk/review.pdf","mimeType":"application/pdf","sha256":"b94d27b9934d3e08a52e52d7da7dabfade000000000000000000000000000000"},"kind":"attachment"},"text":""}}

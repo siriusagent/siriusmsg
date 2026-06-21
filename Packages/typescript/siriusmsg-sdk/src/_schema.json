@@ -1,0 +1,1688 @@
+{
+  "$defs" : {
+    "SiriusMsgAdapterID" : {
+      "description" : "Adapter identifier.",
+      "type" : "string"
+    },
+    "SiriusMsgAdapterMode" : {
+      "enum" : [
+        "direct",
+        "durable"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgAdapterQueueMetrics" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "blockedReview" : {
+          "type" : "integer"
+        },
+        "deadLetter" : {
+          "type" : "integer"
+        },
+        "failed" : {
+          "type" : "integer"
+        },
+        "oldestPendingJobAgeSeconds" : {
+          "type" : "number"
+        },
+        "processing" : {
+          "type" : "integer"
+        },
+        "queued" : {
+          "type" : "integer"
+        },
+        "retrying" : {
+          "type" : "integer"
+        },
+        "succeeded" : {
+          "type" : "integer"
+        }
+      },
+      "required" : [
+        "queued",
+        "retrying",
+        "processing",
+        "blockedReview",
+        "deadLetter",
+        "failed",
+        "succeeded"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgAdapterRunState" : {
+      "enum" : [
+        "backingOff",
+        "blocked",
+        "connecting",
+        "failed",
+        "idle",
+        "processing",
+        "stopped",
+        "subscribed"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgAllowlist" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "chatIDs" : {
+          "items" : {
+            "$ref" : "#/$defs/SiriusMsgChatID"
+          },
+          "type" : "array",
+          "uniqueItems" : true
+        },
+        "handleIDs" : {
+          "items" : {
+            "$ref" : "#/$defs/SiriusMsgHandleID"
+          },
+          "type" : "array",
+          "uniqueItems" : true
+        }
+      },
+      "required" : [
+        "chatIDs",
+        "handleIDs"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgAttachmentDiagnosticCode" : {
+      "enum" : [
+        "attachmentCapableSubscriberRequired",
+        "failedTranscode",
+        "sourceOutsideMessagesAttachments",
+        "tooLarge",
+        "unreadable",
+        "unsupportedType"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgAttachmentFetchRequest" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "attachmentID" : {
+          "$ref" : "#/$defs/SiriusMsgAttachmentID"
+        }
+      },
+      "required" : [
+        "attachmentID"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgAttachmentFileReference" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "localFilePath" : {
+          "type" : "string"
+        },
+        "metadata" : {
+          "$ref" : "#/$defs/SiriusMsgAttachmentMetadata"
+        }
+      },
+      "required" : [
+        "metadata",
+        "localFilePath"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgAttachmentID" : {
+      "description" : "Public attachment identifier.",
+      "type" : "string"
+    },
+    "SiriusMsgAttachmentKind" : {
+      "enum" : [
+        "document",
+        "image"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgAttachmentMetadata" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "byteCount" : {
+          "type" : "integer"
+        },
+        "diagnosticCode" : {
+          "$ref" : "#/$defs/SiriusMsgAttachmentDiagnosticCode"
+        },
+        "displayName" : {
+          "type" : "string"
+        },
+        "height" : {
+          "type" : "integer"
+        },
+        "id" : {
+          "$ref" : "#/$defs/SiriusMsgAttachmentID"
+        },
+        "kind" : {
+          "$ref" : "#/$defs/SiriusMsgAttachmentKind"
+        },
+        "mimeType" : {
+          "type" : "string"
+        },
+        "sha256" : {
+          "type" : "string"
+        },
+        "state" : {
+          "$ref" : "#/$defs/SiriusMsgAttachmentState"
+        },
+        "width" : {
+          "type" : "integer"
+        }
+      },
+      "required" : [
+        "id",
+        "kind",
+        "state",
+        "mimeType",
+        "byteCount"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgAttachmentState" : {
+      "enum" : [
+        "failed",
+        "materialized",
+        "tooLarge",
+        "unreadable",
+        "unsupportedType"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgAuthTokenRotationResult" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "createdAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "previousCreatedAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "rotatedAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "staleAfterDays" : {
+          "type" : "integer"
+        },
+        "token" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "token",
+        "previousCreatedAt",
+        "createdAt",
+        "rotatedAt",
+        "staleAfterDays"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgCapability" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "diagnosticCode" : {
+          "type" : "string"
+        },
+        "evidenceNote" : {
+          "type" : "string"
+        },
+        "evidenceURL" : {
+          "format" : "uri",
+          "type" : "string"
+        },
+        "feature" : {
+          "$ref" : "#/$defs/SiriusMsgFeature"
+        },
+        "proof" : {
+          "$ref" : "#/$defs/SiriusMsgCapabilityProof"
+        },
+        "support" : {
+          "$ref" : "#/$defs/SiriusMsgCapabilitySupport"
+        },
+        "transport" : {
+          "$ref" : "#/$defs/SiriusMsgTransport"
+        }
+      },
+      "required" : [
+        "feature",
+        "transport",
+        "support",
+        "proof",
+        "evidenceNote"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgCapabilityProof" : {
+      "enum" : [
+        "documented",
+        "none",
+        "providerDocumented",
+        "scriptingBridgeVerb",
+        "scriptingBridgeVerbAndDocumented",
+        "scriptingBridgeVerbAndStoreConfirmed",
+        "storeConfirmed"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgCapabilitySupport" : {
+      "enum" : [
+        "blocked",
+        "degraded",
+        "providerOnly",
+        "receiveOnly",
+        "researchGated",
+        "supported",
+        "unsupported"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgChatID" : {
+      "description" : "Public chat identifier.",
+      "type" : "string"
+    },
+    "SiriusMsgContent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "attachment" : {
+          "$ref" : "#/$defs/SiriusMsgOutboundAttachment"
+        },
+        "edit" : {
+          "$ref" : "#/$defs/SiriusMsgEditContent"
+        },
+        "kind" : {
+          "$ref" : "#/$defs/SiriusMsgContentKind"
+        },
+        "messageEffect" : {
+          "$ref" : "#/$defs/SiriusMsgMessageEffectContent"
+        },
+        "reaction" : {
+          "$ref" : "#/$defs/SiriusMsgReactionContent"
+        },
+        "reply" : {
+          "$ref" : "#/$defs/SiriusMsgReplyContent"
+        },
+        "richLink" : {
+          "$ref" : "#/$defs/SiriusMsgRichLink"
+        },
+        "text" : {
+          "type" : "string"
+        },
+        "typing" : {
+          "$ref" : "#/$defs/SiriusMsgTypingState"
+        },
+        "unsend" : {
+          "$ref" : "#/$defs/SiriusMsgUnsendContent"
+        },
+        "unsupported" : {
+          "$ref" : "#/$defs/SiriusMsgUnsupportedContent"
+        }
+      },
+      "required" : [
+        "kind"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgContentKind" : {
+      "enum" : [
+        "attachment",
+        "edit",
+        "messageEffect",
+        "reaction",
+        "reply",
+        "richLink",
+        "text",
+        "typing",
+        "unsend",
+        "unsupported"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgCursorState" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "lastRowIDByChatID" : {
+          "additionalProperties" : {
+            "type" : "integer"
+          },
+          "type" : "object"
+        }
+      },
+      "required" : [
+        "lastRowIDByChatID"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgEditContent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "replacementText" : {
+          "type" : "string"
+        },
+        "targetMessageID" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        }
+      },
+      "required" : [
+        "targetMessageID",
+        "replacementText"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgFeature" : {
+      "enum" : [
+        "applePayBusinessAction",
+        "inboundAttachment",
+        "inboundEdit",
+        "inboundReaction",
+        "inboundReplyReference",
+        "inboundText",
+        "inboundUnsend",
+        "miniAppCard",
+        "sendEdit",
+        "sendFile",
+        "sendMessageEffect",
+        "sendReaction",
+        "sendRichLink",
+        "sendText",
+        "sendThreadedReply",
+        "sendTypingIndicator",
+        "sendUnsend"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgHandleID" : {
+      "description" : "Public handle identifier.",
+      "type" : "string"
+    },
+    "SiriusMsgHealth" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "activeTransport" : {
+          "$ref" : "#/$defs/SiriusMsgTransport"
+        },
+        "capabilities" : {
+          "items" : {
+            "$ref" : "#/$defs/SiriusMsgCapability"
+          },
+          "type" : "array"
+        },
+        "components" : {
+          "items" : {
+            "$ref" : "#/$defs/SiriusMsgHealthComponent"
+          },
+          "type" : "array"
+        },
+        "reason" : {
+          "type" : "string"
+        },
+        "recipeRuntime" : {
+          "$ref" : "#/$defs/SiriusMsgRecipeRuntimeStatus"
+        },
+        "state" : {
+          "$ref" : "#/$defs/SiriusMsgHealthState"
+        }
+      },
+      "required" : [
+        "state",
+        "reason",
+        "activeTransport",
+        "components",
+        "capabilities"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgHealthComponent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "detail" : {
+          "$ref" : "#/$defs/SiriusMsgHealthComponentDetail"
+        },
+        "kind" : {
+          "$ref" : "#/$defs/SiriusMsgHealthComponentKind"
+        },
+        "reason" : {
+          "type" : "string"
+        },
+        "state" : {
+          "$ref" : "#/$defs/SiriusMsgHealthComponentState"
+        }
+      },
+      "required" : [
+        "kind",
+        "state",
+        "reason"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgHealthComponentDetail" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "adapterID" : {
+          "$ref" : "#/$defs/SiriusMsgAdapterID"
+        },
+        "adapterMode" : {
+          "$ref" : "#/$defs/SiriusMsgAdapterMode"
+        },
+        "adapterQueueMetrics" : {
+          "$ref" : "#/$defs/SiriusMsgAdapterQueueMetrics"
+        },
+        "adapterRunState" : {
+          "$ref" : "#/$defs/SiriusMsgAdapterRunState"
+        },
+        "endpoint" : {
+          "type" : "string"
+        },
+        "lastVMReachabilityProbeAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "peerCredentialPolicy" : {
+          "type" : "string"
+        },
+        "peerCredentialsEnforced" : {
+          "type" : "boolean"
+        },
+        "port" : {
+          "maximum" : 65535,
+          "minimum" : 0,
+          "type" : "integer"
+        },
+        "tokenAgeDays" : {
+          "type" : "integer"
+        },
+        "tokenCreatedAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "tokenStaleAfterDays" : {
+          "type" : "integer"
+        },
+        "vmReachability" : {
+          "$ref" : "#/$defs/SiriusMsgVMReachabilityState"
+        }
+      },
+      "type" : "object"
+    },
+    "SiriusMsgHealthComponentKind" : {
+      "enum" : [
+        "adapters",
+        "allowlistPersistence",
+        "attachments",
+        "authToken",
+        "automation",
+        "cursorPersistence",
+        "hooks",
+        "messagesDatabase",
+        "serviceLock",
+        "socket",
+        "vmListener"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgHealthComponentState" : {
+      "enum" : [
+        "blocked",
+        "degraded",
+        "healthy",
+        "notConfigured"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgHealthState" : {
+      "enum" : [
+        "blocked",
+        "degraded",
+        "healthy",
+        "starting",
+        "stopped"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgImageRef" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "mimeType" : {
+          "type" : "string"
+        },
+        "sha256" : {
+          "type" : "string"
+        },
+        "url" : {
+          "format" : "uri",
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "url"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgInboundEvent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "kind" : {
+          "$ref" : "#/$defs/SiriusMsgInboundEventKind"
+        },
+        "message" : {
+          "$ref" : "#/$defs/SiriusMsgMessageEvent"
+        },
+        "messageEdited" : {
+          "$ref" : "#/$defs/SiriusMsgMessageEditedEvent"
+        },
+        "messageUnsent" : {
+          "$ref" : "#/$defs/SiriusMsgMessageUnsentEvent"
+        },
+        "reaction" : {
+          "$ref" : "#/$defs/SiriusMsgReactionEvent"
+        },
+        "replyReference" : {
+          "$ref" : "#/$defs/SiriusMsgReplyReferenceEvent"
+        }
+      },
+      "required" : [
+        "kind"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgInboundEventKind" : {
+      "enum" : [
+        "message",
+        "messageEdited",
+        "messageUnsent",
+        "reaction",
+        "replyReference"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgMessageEditedEvent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "chatID" : {
+          "$ref" : "#/$defs/SiriusMsgChatID"
+        },
+        "editedAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "isGroupChat" : {
+          "type" : "boolean"
+        },
+        "messageID" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        },
+        "rowID" : {
+          "description" : "Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.",
+          "maximum" : 9007199254740991,
+          "minimum" : 0,
+          "type" : "integer"
+        }
+      },
+      "required" : [
+        "messageID",
+        "chatID",
+        "rowID",
+        "editedAt",
+        "isGroupChat"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgMessageEffectContent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "effectName" : {
+          "type" : "string"
+        },
+        "text" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "text",
+        "effectName"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgMessageEvent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "attachments" : {
+          "items" : {
+            "$ref" : "#/$defs/SiriusMsgAttachmentMetadata"
+          },
+          "type" : "array"
+        },
+        "authorDisplayName" : {
+          "type" : "string"
+        },
+        "chatID" : {
+          "$ref" : "#/$defs/SiriusMsgChatID"
+        },
+        "handleID" : {
+          "$ref" : "#/$defs/SiriusMsgHandleID"
+        },
+        "id" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        },
+        "isGroupChat" : {
+          "type" : "boolean"
+        },
+        "receivedAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "replyToMessageID" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        },
+        "rowID" : {
+          "description" : "Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.",
+          "maximum" : 9007199254740991,
+          "minimum" : 0,
+          "type" : "integer"
+        },
+        "text" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "id",
+        "chatID",
+        "rowID",
+        "authorDisplayName",
+        "text",
+        "receivedAt",
+        "isGroupChat",
+        "attachments"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgMessageID" : {
+      "description" : "Public message identifier.",
+      "type" : "string"
+    },
+    "SiriusMsgMessageUnsentEvent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "chatID" : {
+          "$ref" : "#/$defs/SiriusMsgChatID"
+        },
+        "isGroupChat" : {
+          "type" : "boolean"
+        },
+        "messageID" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        },
+        "retractedAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "rowID" : {
+          "description" : "Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.",
+          "maximum" : 9007199254740991,
+          "minimum" : 0,
+          "type" : "integer"
+        }
+      },
+      "required" : [
+        "messageID",
+        "chatID",
+        "rowID",
+        "retractedAt",
+        "isGroupChat"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgOutboundAttachment" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "byteCount" : {
+          "type" : "integer"
+        },
+        "displayName" : {
+          "type" : "string"
+        },
+        "fileURL" : {
+          "format" : "uri",
+          "type" : "string"
+        },
+        "mimeType" : {
+          "type" : "string"
+        },
+        "sha256" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "fileURL",
+        "mimeType",
+        "byteCount",
+        "sha256"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgReaction" : {
+      "enum" : [
+        "dislike",
+        "emphasize",
+        "laugh",
+        "like",
+        "love",
+        "question"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgReactionAction" : {
+      "enum" : [
+        "added",
+        "removed"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgReactionContent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "action" : {
+          "$ref" : "#/$defs/SiriusMsgReactionAction"
+        },
+        "reaction" : {
+          "$ref" : "#/$defs/SiriusMsgReaction"
+        },
+        "targetMessageID" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        }
+      },
+      "required" : [
+        "targetMessageID",
+        "reaction",
+        "action"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgReactionEvent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "action" : {
+          "$ref" : "#/$defs/SiriusMsgReactionAction"
+        },
+        "authorDisplayName" : {
+          "type" : "string"
+        },
+        "chatID" : {
+          "$ref" : "#/$defs/SiriusMsgChatID"
+        },
+        "handleID" : {
+          "$ref" : "#/$defs/SiriusMsgHandleID"
+        },
+        "id" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        },
+        "isGroupChat" : {
+          "type" : "boolean"
+        },
+        "reaction" : {
+          "$ref" : "#/$defs/SiriusMsgReaction"
+        },
+        "receivedAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "rowID" : {
+          "description" : "Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.",
+          "maximum" : 9007199254740991,
+          "minimum" : 0,
+          "type" : "integer"
+        },
+        "targetMessageID" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        }
+      },
+      "required" : [
+        "id",
+        "chatID",
+        "rowID",
+        "authorDisplayName",
+        "targetMessageID",
+        "reaction",
+        "action",
+        "receivedAt",
+        "isGroupChat"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgRecipe" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "actions" : {
+          "items" : {
+            "$ref" : "#/$defs/SiriusMsgContent"
+          },
+          "type" : "array"
+        },
+        "description" : {
+          "type" : "string"
+        },
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "integration" : {
+          "$ref" : "#/$defs/SiriusMsgRecipeIntegration"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "requiredCapabilities" : {
+          "items" : {
+            "$ref" : "#/$defs/SiriusMsgFeature"
+          },
+          "type" : "array"
+        },
+        "trigger" : {
+          "$ref" : "#/$defs/SiriusMsgRecipeTrigger"
+        }
+      },
+      "required" : [
+        "id",
+        "name",
+        "description",
+        "trigger",
+        "integration",
+        "requiredCapabilities",
+        "actions",
+        "enabled"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgRecipeAdapterEnvelope" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "recipe" : {
+          "$ref" : "#/$defs/SiriusMsgRecipeIntegrationEnvelope"
+        },
+        "triggerEvent" : {
+          "$ref" : "#/$defs/SiriusMsgRecipeTriggerEvent"
+        }
+      },
+      "required" : [
+        "recipe",
+        "triggerEvent"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgRecipeIntegration" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "identifier" : {
+          "type" : "string"
+        },
+        "kind" : {
+          "$ref" : "#/$defs/SiriusMsgRecipeIntegrationKind"
+        }
+      },
+      "required" : [
+        "kind"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgRecipeIntegrationEnvelope" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "actionKinds" : {
+          "items" : {
+            "$ref" : "#/$defs/SiriusMsgContentKind"
+          },
+          "type" : "array"
+        },
+        "integration" : {
+          "$ref" : "#/$defs/SiriusMsgRecipeIntegration"
+        },
+        "recipeID" : {
+          "type" : "string"
+        },
+        "recipeName" : {
+          "type" : "string"
+        },
+        "requiredCapabilities" : {
+          "items" : {
+            "$ref" : "#/$defs/SiriusMsgFeature"
+          },
+          "type" : "array"
+        },
+        "trigger" : {
+          "$ref" : "#/$defs/SiriusMsgRecipeTrigger"
+        }
+      },
+      "required" : [
+        "recipeID",
+        "recipeName",
+        "trigger",
+        "integration",
+        "requiredCapabilities",
+        "actionKinds"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgRecipeIntegrationKind" : {
+      "enum" : [
+        "calendar",
+        "github",
+        "gmail",
+        "linear",
+        "mcp",
+        "notion",
+        "outlook",
+        "reminders",
+        "webhook"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgRecipeRuntimeStatus" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "actionlessEnabledRecipeCount" : {
+          "type" : "integer"
+        },
+        "deferredTriggerRecipeCount" : {
+          "type" : "integer"
+        },
+        "diagnosticCounts" : {
+          "additionalProperties" : {
+            "type" : "integer"
+          },
+          "type" : "object"
+        },
+        "enabledRecipeCount" : {
+          "type" : "integer"
+        },
+        "evaluatedCount" : {
+          "type" : "integer"
+        },
+        "failedCount" : {
+          "type" : "integer"
+        },
+        "lastEventAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "lastReloadAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "lastReloadDiagnostic" : {
+          "type" : "string"
+        },
+        "liveTriggers" : {
+          "items" : {
+            "$ref" : "#/$defs/SiriusMsgRecipeTrigger"
+          },
+          "type" : "array"
+        },
+        "loadedRecipeCount" : {
+          "type" : "integer"
+        },
+        "runningRecipeCount" : {
+          "type" : "integer"
+        },
+        "sentCount" : {
+          "type" : "integer"
+        },
+        "skippedCount" : {
+          "type" : "integer"
+        },
+        "triggerCounts" : {
+          "additionalProperties" : {
+            "$ref" : "#/$defs/SiriusMsgRecipeTriggerRuntimeCounts"
+          },
+          "type" : "object"
+        }
+      },
+      "required" : [
+        "loadedRecipeCount",
+        "enabledRecipeCount",
+        "runningRecipeCount",
+        "deferredTriggerRecipeCount",
+        "actionlessEnabledRecipeCount",
+        "liveTriggers",
+        "evaluatedCount",
+        "sentCount",
+        "skippedCount",
+        "failedCount",
+        "diagnosticCounts",
+        "triggerCounts"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgRecipeTrigger" : {
+      "enum" : [
+        "edit",
+        "inboundMessage",
+        "reaction",
+        "schedule",
+        "unsend",
+        "webhook"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgRecipeTriggerEvent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "chatID" : {
+          "$ref" : "#/$defs/SiriusMsgChatID"
+        },
+        "handleID" : {
+          "$ref" : "#/$defs/SiriusMsgHandleID"
+        },
+        "isBridgeGenerated" : {
+          "type" : "boolean"
+        },
+        "messageID" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        },
+        "rowID" : {
+          "description" : "Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.",
+          "maximum" : 9007199254740991,
+          "minimum" : 0,
+          "type" : "integer"
+        },
+        "source" : {
+          "$ref" : "#/$defs/SiriusMsgRecipeTriggerSource"
+        },
+        "trigger" : {
+          "$ref" : "#/$defs/SiriusMsgRecipeTrigger"
+        }
+      },
+      "required" : [
+        "trigger",
+        "chatID",
+        "source",
+        "isBridgeGenerated"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgRecipeTriggerRuntimeCounts" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "diagnosticCounts" : {
+          "additionalProperties" : {
+            "type" : "integer"
+          },
+          "type" : "object"
+        },
+        "evaluatedCount" : {
+          "type" : "integer"
+        },
+        "failedCount" : {
+          "type" : "integer"
+        },
+        "sentCount" : {
+          "type" : "integer"
+        },
+        "skippedCount" : {
+          "type" : "integer"
+        }
+      },
+      "required" : [
+        "evaluatedCount",
+        "sentCount",
+        "skippedCount",
+        "failedCount",
+        "diagnosticCounts"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgRecipeTriggerSource" : {
+      "enum" : [
+        "inbound",
+        "schedule",
+        "webhook"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgReconnectPolicy" : {
+      "enum" : [
+        "default",
+        "none"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgReplyContent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "targetMessageID" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        },
+        "text" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "targetMessageID",
+        "text"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgReplyReferenceEvent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "chatID" : {
+          "$ref" : "#/$defs/SiriusMsgChatID"
+        },
+        "isGroupChat" : {
+          "type" : "boolean"
+        },
+        "messageID" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        },
+        "receivedAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "repliedToMessageID" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        },
+        "rowID" : {
+          "description" : "Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.",
+          "maximum" : 9007199254740991,
+          "minimum" : 0,
+          "type" : "integer"
+        }
+      },
+      "required" : [
+        "messageID",
+        "chatID",
+        "rowID",
+        "repliedToMessageID",
+        "receivedAt",
+        "isGroupChat"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgRichLink" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "imageRef" : {
+          "$ref" : "#/$defs/SiriusMsgImageRef"
+        },
+        "kind" : {
+          "$ref" : "#/$defs/SiriusMsgRichLinkKind"
+        },
+        "subtitle" : {
+          "type" : "string"
+        },
+        "title" : {
+          "type" : "string"
+        },
+        "url" : {
+          "format" : "uri",
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "url",
+        "kind"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgRichLinkCardArtifact" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "html" : {
+          "type" : "string"
+        },
+        "publicURL" : {
+          "format" : "uri",
+          "type" : "string"
+        },
+        "redirectStatusCode" : {
+          "type" : "integer"
+        },
+        "redirectURL" : {
+          "format" : "uri",
+          "type" : "string"
+        },
+        "slug" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "slug",
+        "publicURL",
+        "redirectURL",
+        "redirectStatusCode",
+        "html"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgRichLinkKind" : {
+      "enum" : [
+        "generatedPreview",
+        "plain"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgSchemaCapabilities" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "editAwarenessAvailable" : {
+          "type" : "boolean"
+        },
+        "replyReferenceAvailable" : {
+          "type" : "boolean"
+        }
+      },
+      "required" : [
+        "replyReferenceAvailable",
+        "editAwarenessAvailable"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgSendConfirmationState" : {
+      "enum" : [
+        "confirmed",
+        "dispatched",
+        "notRequested",
+        "unconfirmed"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgSendRequest" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "accountID" : {
+          "type" : "string"
+        },
+        "chatID" : {
+          "$ref" : "#/$defs/SiriusMsgChatID"
+        },
+        "content" : {
+          "$ref" : "#/$defs/SiriusMsgContent"
+        },
+        "text" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "chatID",
+        "text"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgSendResult" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "accepted" : {
+          "type" : "boolean"
+        },
+        "confirmationState" : {
+          "$ref" : "#/$defs/SiriusMsgSendConfirmationState"
+        },
+        "diagnosticCode" : {
+          "type" : "string"
+        },
+        "platformMessageID" : {
+          "type" : "string"
+        },
+        "resolvedContent" : {
+          "$ref" : "#/$defs/SiriusMsgContent"
+        }
+      },
+      "required" : [
+        "accepted",
+        "confirmationState"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgServiceAck" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "chatID" : {
+          "$ref" : "#/$defs/SiriusMsgChatID"
+        },
+        "messageID" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        },
+        "rowID" : {
+          "description" : "Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.",
+          "maximum" : 9007199254740991,
+          "minimum" : 0,
+          "type" : "integer"
+        }
+      },
+      "required" : [
+        "messageID",
+        "chatID",
+        "rowID"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgServiceAuthToken" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "createdAt" : {
+          "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
+          "type" : "number"
+        },
+        "token" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "token",
+        "createdAt"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgServiceError" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "code" : {
+          "$ref" : "#/$defs/SiriusMsgServiceErrorCode"
+        },
+        "diagnosticCode" : {
+          "type" : "string"
+        },
+        "message" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "code",
+        "message"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgServiceErrorCode" : {
+      "enum" : [
+        "ackNotOutstanding",
+        "attachmentHashMismatch",
+        "attachmentNotDelivered",
+        "attachmentNotFound",
+        "attachmentTooLarge",
+        "attachmentTransportUnsupported",
+        "attachmentUnavailable",
+        "attachmentUnsupportedType",
+        "authFailed",
+        "authRequired",
+        "backpressure",
+        "internalError",
+        "invalidRequest",
+        "malformedFrame",
+        "peerCredentialsRejected",
+        "protocolVersionUnsupported",
+        "sendRejected",
+        "subscriptionAlreadyActive",
+        "tokenRotationFailed",
+        "transportUnavailable"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgServiceEvent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "health" : {
+          "$ref" : "#/$defs/SiriusMsgHealth"
+        },
+        "kind" : {
+          "$ref" : "#/$defs/SiriusMsgServiceEventKind"
+        },
+        "message" : {
+          "$ref" : "#/$defs/SiriusMsgMessageEvent"
+        },
+        "messageEdited" : {
+          "$ref" : "#/$defs/SiriusMsgMessageEditedEvent"
+        },
+        "messageUnsent" : {
+          "$ref" : "#/$defs/SiriusMsgMessageUnsentEvent"
+        },
+        "reaction" : {
+          "$ref" : "#/$defs/SiriusMsgReactionEvent"
+        },
+        "replyReference" : {
+          "$ref" : "#/$defs/SiriusMsgReplyReferenceEvent"
+        }
+      },
+      "required" : [
+        "kind"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgServiceEventKind" : {
+      "enum" : [
+        "health",
+        "message",
+        "messageEdited",
+        "messageUnsent",
+        "reaction",
+        "replyReference"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgServiceRequest" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "ack" : {
+          "$ref" : "#/$defs/SiriusMsgServiceAck"
+        },
+        "allowlist" : {
+          "$ref" : "#/$defs/SiriusMsgAllowlist"
+        },
+        "attachmentFetch" : {
+          "$ref" : "#/$defs/SiriusMsgAttachmentFetchRequest"
+        },
+        "authToken" : {
+          "type" : "string"
+        },
+        "kind" : {
+          "$ref" : "#/$defs/SiriusMsgServiceRequestKind"
+        },
+        "protocolVersion" : {
+          "const" : 1,
+          "description" : "SiriusMsg protocol version.",
+          "type" : "integer"
+        },
+        "requestID" : {
+          "type" : "string"
+        },
+        "sendRequest" : {
+          "$ref" : "#/$defs/SiriusMsgSendRequest"
+        },
+        "subscriptionOptions" : {
+          "$ref" : "#/$defs/SiriusMsgSubscriptionOptions"
+        },
+        "transport" : {
+          "$ref" : "#/$defs/SiriusMsgTransport"
+        }
+      },
+      "required" : [
+        "protocolVersion",
+        "requestID",
+        "kind"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgServiceRequestKind" : {
+      "enum" : [
+        "ack",
+        "authenticate",
+        "capabilities",
+        "fetchAttachment",
+        "health",
+        "rotateAuthToken",
+        "send",
+        "subscribe",
+        "updateAllowlist"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgServiceResponse" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "attachmentFile" : {
+          "$ref" : "#/$defs/SiriusMsgAttachmentFileReference"
+        },
+        "authTokenRotationResult" : {
+          "$ref" : "#/$defs/SiriusMsgAuthTokenRotationResult"
+        },
+        "capabilities" : {
+          "items" : {
+            "$ref" : "#/$defs/SiriusMsgCapability"
+          },
+          "type" : "array"
+        },
+        "error" : {
+          "$ref" : "#/$defs/SiriusMsgServiceError"
+        },
+        "event" : {
+          "$ref" : "#/$defs/SiriusMsgServiceEvent"
+        },
+        "health" : {
+          "$ref" : "#/$defs/SiriusMsgHealth"
+        },
+        "kind" : {
+          "$ref" : "#/$defs/SiriusMsgServiceResponseKind"
+        },
+        "protocolVersion" : {
+          "const" : 1,
+          "description" : "SiriusMsg protocol version.",
+          "type" : "integer"
+        },
+        "requestID" : {
+          "type" : "string"
+        },
+        "sendResult" : {
+          "$ref" : "#/$defs/SiriusMsgSendResult"
+        }
+      },
+      "required" : [
+        "protocolVersion",
+        "kind"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgServiceResponseKind" : {
+      "enum" : [
+        "acked",
+        "allowlistUpdated",
+        "attachmentFile",
+        "authTokenRotated",
+        "authenticated",
+        "capabilities",
+        "error",
+        "event",
+        "health",
+        "sendResult",
+        "subscribed"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgSubscriptionOptions" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "supportsAttachments" : {
+          "type" : "boolean"
+        }
+      },
+      "required" : [
+        "supportsAttachments"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgTransport" : {
+      "enum" : [
+        "localMessagesAutomation",
+        "managedRelay",
+        "messagesForBusiness"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgTransportDescriptor" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "displayName" : {
+          "type" : "string"
+        },
+        "summary" : {
+          "type" : "string"
+        },
+        "transport" : {
+          "$ref" : "#/$defs/SiriusMsgTransport"
+        },
+        "trustPosture" : {
+          "$ref" : "#/$defs/SiriusMsgTransportTrustPosture"
+        }
+      },
+      "required" : [
+        "transport",
+        "displayName",
+        "trustPosture",
+        "summary"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgTransportTrustPosture" : {
+      "enum" : [
+        "appleBusinessProvider",
+        "localMacPrivate",
+        "managedDedicatedRelay"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgTypingState" : {
+      "enum" : [
+        "started",
+        "stopped"
+      ],
+      "type" : "string"
+    },
+    "SiriusMsgUnsendContent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "targetMessageID" : {
+          "$ref" : "#/$defs/SiriusMsgMessageID"
+        }
+      },
+      "required" : [
+        "targetMessageID"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgUnsupportedContent" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "diagnosticCode" : {
+          "type" : "string"
+        },
+        "feature" : {
+          "$ref" : "#/$defs/SiriusMsgFeature"
+        },
+        "reason" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "feature",
+        "diagnosticCode",
+        "reason"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgVMReachabilityState" : {
+      "enum" : [
+        "reachable",
+        "unprobed",
+        "unreachable"
+      ],
+      "type" : "string"
+    }
+  },
+  "$id" : "https://schemas.bestbyteai.com/siriusmsg/protocol-v1.schema.json",
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "description" : "Public SiriusMsg local-service protocol schema. Generated from Swift public wire types.",
+  "title" : "SiriusMsg Protocol v1",
+  "type" : "object"
+}

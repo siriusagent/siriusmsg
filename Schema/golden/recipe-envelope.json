@@ -1,0 +1,1 @@
+{"actionKinds":["richLink"],"integration":{"identifier":"bestbyte/sirius","kind":"github"},"recipeID":"github-review","recipeName":"GitHub review","requiredCapabilities":["sendRichLink"],"trigger":"webhook"}

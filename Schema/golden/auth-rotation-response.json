@@ -1,0 +1,1 @@
+{"authTokenRotationResult":{"createdAt":2,"previousCreatedAt":1,"rotatedAt":3,"staleAfterDays":90,"token":"next-token"},"kind":"authTokenRotated","protocolVersion":1,"requestID":"rotate"}

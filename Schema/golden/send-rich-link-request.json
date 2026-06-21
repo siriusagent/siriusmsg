@@ -1,0 +1,1 @@
+{"kind":"send","protocolVersion":1,"requestID":"send-link","sendRequest":{"chatID":"SMS;-;+15555550100","content":{"kind":"richLink","richLink":{"imageRef":{"mimeType":"image/png","url":"https://cdn.example.com/review.png"},"kind":"plain","subtitle":"Approve this run.","title":"Review","url":"https://example.com/review"}},"text":"https://example.com/review"}}

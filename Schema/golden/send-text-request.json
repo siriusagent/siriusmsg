@@ -1,0 +1,1 @@
+{"kind":"send","protocolVersion":1,"requestID":"send-text","sendRequest":{"chatID":"SMS;-;+15555550100","content":{"kind":"text","text":"hello"},"text":"hello"}}

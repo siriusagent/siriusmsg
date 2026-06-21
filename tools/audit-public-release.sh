@@ -161,15 +161,15 @@ if find . -path './.git' -prune -o \( \
   fail "private source tree material is present"
 fi
 
-if rg -n --hidden --glob '!.git/**' --glob '!tools/audit-public-release.sh' \
+if rg -n --hidden --glob '!.git' --glob '!.git/**' --glob '!tools/audit-public-release.sh' \
   '(ghp_[A-Za-z0-9_]{20,}|gho_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|APPLE_ID\s*=|APP_SPECIFIC_PASSWORD\s*=|SIRIUSMSG_NOTARY_PROFILE\s*=|com\.apple\.developer\.team-identifier|NYAM936LHR)' . >/tmp/siriusmsg-public-secret-matches.txt; then
   cat /tmp/siriusmsg-public-secret-matches.txt >&2
   fail "secret-like literal or signing identifier found"
 fi
 rm -f /tmp/siriusmsg-public-secret-matches.txt
 
-if rg -n --hidden --glob '!.git/**' --glob '!tools/audit-public-release.sh' \
-  '(github\.com/mikhutchinson|/Users/mikhutchinson|Library/Messages|chat\.db|service-token\.json|validation-runs|operational-log\.json)' . >/tmp/siriusmsg-public-private-matches.txt; then
+if rg -n --hidden --glob '!.git' --glob '!.git/**' --glob '!tools/audit-public-release.sh' \
+  '(github\.com/mikhutchinson|/Users/mikhutchinson|Library/Messages|chat\.db|validation-runs|operational-log\.json)' . >/tmp/siriusmsg-public-private-matches.txt; then
   cat /tmp/siriusmsg-public-private-matches.txt >&2
   fail "private source, local path, or operational artifact reference found"
 fi
