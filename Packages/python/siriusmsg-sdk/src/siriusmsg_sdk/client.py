@@ -1,4 +1,4 @@
-"""Hand-written Python client mirroring SiriusMsgKit."""
+"""Hand-written Python client for the SiriusMsg local protocol."""
 
 from __future__ import annotations
 

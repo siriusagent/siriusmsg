@@ -135,7 +135,7 @@ The local transport supports inbound text, inbound attachment metadata, send tex
 
 Unsupported content is rejected before Automation dispatch with `accepted: false` and a stable `diagnosticCode`; it is not converted into a misleading text fallback.
 
-Kit exposes typed helpers for `sendText`, `sendAttachment`, `sendRichLink`, `sendReaction`, `sendThreadedReply`, `sendEdit`, `sendUnsend`, `sendTyping`, and `sendMessageEffect`. The helpers still negotiate against the active local matrix, so research-gated local sends fail before the request reaches Automation.
+SDK clients expose typed helpers for `sendText`, `sendAttachment`, `sendRichLink`, `sendReaction`, `sendThreadedReply`, `sendEdit`, `sendUnsend`, `sendTyping`, and `sendMessageEffect`. The helpers still negotiate against the active local matrix, so research-gated local sends fail before the request reaches Automation.
 
 Release automation can stage static rich-link card artifacts for publication to a configured cards host. The cards host must serve the preview page as static HTML and publish a server-side `302` redirect for the human tap path. Publishing remains a release/update-host operation; the local bridge never edits a hosted repo directly.
 
@@ -179,7 +179,7 @@ Outbound file send is local but constrained. The service accepts the same docume
 ~/Library/Application Support/SiriusMsg/Attachments/<sha-prefix>/<sha>.<ext>
 ```
 
-Kit clients should call `fetchAttachmentData(id:)` when they need bytes; it verifies `byteCount` and `sha256` before returning data. VM loopback fetch returns `attachmentTransportUnsupported` in this slice so host filesystem paths are not exposed to guest clients.
+SDK clients should fetch attachment bytes through the local protocol helper for their language; the helper verifies `byteCount` and `sha256` before returning data. VM loopback fetch returns `attachmentTransportUnsupported` in this slice so host filesystem paths are not exposed to guest clients.
 
 Attachment errors are structured: `attachmentNotDelivered`, `attachmentUnavailable`, `attachmentTransportUnsupported`, `attachmentHashMismatch`, `attachmentTooLarge`, and `attachmentUnsupportedType`.
 
@@ -226,7 +226,7 @@ Health responses preserve the top-level `state` and `reason` fields, include `ac
 
 `activeTransport` is `localMessagesAutomation` in the default v1 service. The app surfaces a trust posture for each transport:
 
-- `localMessagesAutomation`: local Mac private boundary.
+- `localMessagesAutomation`: local Mac user-approved boundary.
 - `messagesForBusiness`: Apple business-provider boundary.
 - `managedRelay`: managed dedicated relay boundary.
 
@@ -241,13 +241,13 @@ VM listener health states:
 
 Health, errors, and diagnostics must not include message bodies. Message text is present only in deliverable message events.
 
-## Kit Reconnect
+## SDK Reconnect
 
-`SiriusMsgKit` keeps `subscribe()` as a single-shot stream. `subscribe(reconnectPolicy: .default)` opts into reconnecting behavior: reconnect, authenticate, resubscribe, back off, and rely on service redelivery for any rows that were delivered but not ACKed.
+SDK clients should treat `subscribe()` as a single-shot stream unless they explicitly opt into reconnecting behavior. Reconnect means authenticate, resubscribe, back off, and rely on service redelivery for rows that were delivered but not ACKed.
 
-## Generic Adapter Runner
+## Adapter Runner Semantics
 
-`SiriusMsgAdapterRunner` is the reusable Kit boundary for agent stacks and third-party adapters. It does not change protocol version `1`; it composes existing `subscribe`, `send`, and `ack` operations.
+Adapter runners compose existing `subscribe`, `send`, and `ack` operations without changing protocol version `1`.
 
 Direct mode ACKs only after the adapter handler completes cleanly and any required reply send is resolved. Handler failures, retry decisions, rejected replies, and unconfirmed replies do not ACK. Dead-letter decisions are terminal and ACK.
 
@@ -271,7 +271,7 @@ Message bodies must not appear in status files, health, errors, logs, or diagnos
 
 ## Recipes
 
-`SiriusMsgRecipeRunner` is a Kit-level integration facade for app-owned recipes and agent UX. It is not part of Store or Automation. Recipes consume sanitized trigger events, including inbound messages, reactions, edits, unsends, schedules, and webhooks; they require explicit allowlist approval before any outbound action; and they reuse normal `SiriusMsgContent` sends for text, attachments, and rich links.
+Recipes are app-owned integration workflows for agent UX. They are not part of Store or Automation. Recipes consume sanitized trigger events, including inbound messages, reactions, edits, unsends, schedules, and webhooks; they require explicit allowlist approval before any outbound action; and they reuse normal `SiriusMsgContent` sends for text, attachments, and rich links.
 
 Recipe execution is loop-safe by default: bridge-generated trigger events are skipped with `recipeLoopGuarded`. Non-allowlisted chats are skipped with `recipeChatNotAllowlisted`. Unsupported actions are skipped using the same capability diagnostics as direct sends. Recipe run results do not carry message bodies.
 

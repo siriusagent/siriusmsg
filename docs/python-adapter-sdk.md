@@ -3,12 +3,11 @@
 This is the reference surface for Python agent runtimes that consume SiriusMsg.
 It is the right layer for Sirius, Hermes, OpenClaw, and similar Python stacks.
 
-`SiriusMsgKit` remains the Swift client library for the local service. The
-bundled Python package, `siriusmsg`, is the adapter authoring surface hosted by
-`SiriusMsgAgent` through SwiftPython. Python code does not own the socket auth,
-Messages database, AppleEvents send path, cursor state, ACK policy, durable
-queue, or send confirmation. It receives one sanitized turn and returns one
-decision.
+The bundled Python package, `siriusmsg`, is the adapter authoring surface hosted
+by `SiriusMsgAgent` through SwiftPython. Python code does not own socket auth,
+Messages database access, the Messages send path, cursor state, ACK policy,
+durable queue, or send confirmation. It receives one sanitized turn and returns
+one decision.
 
 ## Minimal Handler
 
@@ -84,7 +83,7 @@ async def handle(ctx):
 ```
 
 Keep routing metadata small. The adapter may pass `chat_id`, `message.id`, and
-attempt information to the consumer runtime, but it should not invent a private
+attempt information to the consumer runtime, but it should not invent a parallel
 Messages abstraction or expose handles beyond what the user-facing agent needs.
 
 ## Hermes-Style Runtime
@@ -188,7 +187,7 @@ Adapters decide how to project fetched bytes into their target runtime. SiriusMs
 does not parse documents, OCR images, create provider-specific content blocks, or
 send provider-specific rich payloads from Python. Outbound file send is owned by
 the native service capability matrix and should be requested through the local
-protocol or `SiriusMsgKit`, not by giving hooks or adapters AppleEvents access.
+protocol SDKs, not by giving hooks or adapters AppleEvents access.
 
 ## Error Policy
 
@@ -203,9 +202,8 @@ may already have left Messages.app. Swift owns that blocked-review state.
 
 ## Verification
 
-The private app release gate covers the hosted SDK contract with real
-SwiftPython-hosted Python fixtures against the SiriusMsg adapter host,
-including:
+The hosted SDK contract is covered by the SiriusMsg app release gate with real
+SwiftPython-hosted Python fixtures against the SiriusMsg adapter host, including:
 
 - generic decision normalization
 - Swift async callbacks for health, capabilities, and attachment fetch

@@ -1,8 +1,8 @@
 # Sirius Agent Integration Pattern
 
-This note describes how Sirius consumes SiriusMsg without publishing Sirius
-internals. It is intended as a reference pattern for agent runtimes that want
-Apple Messages support through SiriusMsg.
+This note describes how agent runtimes consume SiriusMsg through the public local
+protocol SDKs. It is a reference pattern for bringing Apple Messages support to
+an agent without adding a second Messages transport.
 
 SiriusMsg is the transport owner. The consuming agent runtime should not open
 Messages, read the Messages database, shell out to AppleScript, call
@@ -31,57 +31,48 @@ The agent runtime owns:
 - projection of fetched attachments into its own model format
 - deciding whether to reply, retry, dead-letter, or mark handled
 
-## Swift Host Shape
+## Public SDK Shape
 
-A Swift host connects through `SiriusMsgKit`, starts a durable adapter runner,
-and forwards each message context into its agent runtime. The handler returns a
-`SiriusMsgAdapterDecision`; Swift performs the actual send and ACK behavior
-through SiriusMsg.
+A public adapter connects through the Python or TypeScript SDK, subscribes to
+allowlisted events, hands each event to its agent runtime, sends replies through
+SiriusMsg, and ACKs only after the handler policy says the turn is owned.
 
-```swift
-let client = try await SiriusMsgClient.connect()
+```python
+from siriusmsg_sdk import SiriusMsgClient, SiriusMsgServiceAck
 
-let runner = try SiriusMsgAdapterRunner.durable(
-    adapterID: SiriusMsgAdapterID(rawValue: "my-agent-imessage"),
-    configuration: SiriusMsgServiceConfiguration(),
-    options: SiriusMsgAdapterRunnerOptions(supportsAttachments: true)
-) { context in
-    let message = context.message
 
-    let attachments = try await fetchAttachmentPayloads(
-        message.attachments,
-        using: client
-    )
+async def run_bridge(agent):
+    client = await SiriusMsgClient.connect()
 
-    let result = try await runAgentTurn(
-        chatID: message.chatID.rawValue,
-        messageID: message.id.rawValue,
-        rowID: message.rowID,
-        text: message.text,
-        receivedAt: message.receivedAt,
-        attempt: context.attempt,
-        attachments: attachments
-    )
+    async for event in client.subscribe(supports_attachments=True):
+        if event.message is None:
+            continue
 
-    switch result.decision {
-    case .reply(let text):
-        return .reply(text: text, accountID: nil)
-    case .handled:
-        return .handled
-    case .retry(let after, let reason):
-        return .retry(after: after, reason: reason)
-    case .deadLetter(let reason):
-        return .deadLetter(reason: reason)
-    }
-}
-
-await runner.run()
+        message = event.message
+        result = await agent.run(
+            input=message.text or "",
+            metadata={
+                "source": "siriusmsg",
+                "chat_id": message.chatID.root,
+                "message_id": message.id.root,
+            },
+        )
+        if result.reply:
+            await client.send_text(message.chatID, result.reply)
+        await client.ack(
+            SiriusMsgServiceAck(
+                messageID=message.id,
+                chatID=message.chatID,
+                rowID=message.rowID,
+            )
+        )
 ```
 
-The important part is the boundary, not these placeholder names. Your runtime
-can call Python, a local model server, an OpenResponses-compatible gateway, or a
-native Swift agent loop. It should still return a SiriusMsg adapter decision
-instead of sending through Messages itself.
+TypeScript follows the same shape with `SiriusMsgClient.connect()`,
+`subscribe`, `sendText`, and `ack`. The important part is the boundary: the
+runtime can call Python, a local model server, an OpenResponses-compatible
+gateway, or a native loop, but it should still send through SiriusMsg instead of
+calling Messages itself.
 
 ## Python Runtime Shape
 
@@ -158,20 +149,23 @@ When enabled, SiriusMsg delivers metadata and a SiriusMsg-owned local file
 reference. The consumer verifies size and hash before projecting the file into
 its own model format.
 
-```swift
-func fetchAttachmentPayloads(
-    _ attachments: [SiriusMsgAttachmentMetadata],
-    using client: SiriusMsgClient
-) async throws -> [AgentAttachment] {
-    var payloads: [AgentAttachment] = []
+```python
+async def fetch_attachment_payloads(client, attachments):
+    payloads = []
 
-    for attachment in attachments where attachment.isFetchable {
-        let file = try await client.fetchAttachmentFile(id: attachment.id)
-        payloads.append(try AgentAttachment(validating: file))
-    }
+    for attachment in attachments:
+        if attachment.state.value != "materialized":
+            continue
+        data = await client.fetch_attachment_data(attachment.id)
+        payloads.append({
+            "id": attachment.id.root,
+            "mime_type": attachment.mimeType,
+            "byte_count": attachment.byteCount,
+            "sha256": attachment.sha256,
+            "bytes": data,
+        })
 
     return payloads
-}
 ```
 
 SiriusMsg does not prescribe provider-specific content blocks. The consuming

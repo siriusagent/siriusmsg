@@ -50,8 +50,7 @@ Public integration surfaces in this repository:
 - [Python adapter SDK](docs/python-adapter-sdk.md): the app-hosted `siriusmsg`
   hook package shape for async handler authors.
 - [Sirius Agent integration pattern](docs/sirius-agent-integration.md), a
-  sanitized reference for wiring an agent runtime without publishing private
-  Sirius internals
+  concrete reference for handing SiriusMsg events to an agent runtime
 
 SDK consumers receive sanitized events and return adapter decisions. SiriusMsg
 keeps Messages permissions, service auth, cursor progress, ACK policy, reply
@@ -70,9 +69,9 @@ npm --prefix Packages/typescript/siriusmsg-sdk ci
 npm --prefix Packages/typescript/siriusmsg-sdk run build
 ```
 
-The Swift client library, `SiriusMsgKit`, is not published as a public SwiftPM
-package yet. Use Python or TypeScript today; Swift package publication is the
-next SDK surface to split out.
+For Swift-native apps, use `SiriusMsgKit` through partner access. Agent runtimes
+should integrate through the public local protocol with the Python and
+TypeScript SDKs above.
 
 ## Verify Download
 
