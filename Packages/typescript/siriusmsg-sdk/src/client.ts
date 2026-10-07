@@ -1,7 +1,10 @@
+import { managedTyping } from "./typing.js";
 import { readFile } from "node:fs/promises";
-import { createHash } from "node:crypto";
+import { pathToFileURL } from "node:url";
+import { createHash, createHmac, randomUUID } from "node:crypto";
 import type {
   SiriusMsgAllowlist,
+  SiriusMsgAllowlistCandidate,
   SiriusMsgAttachmentFileReference,
   SiriusMsgAuthTokenRotationResult,
   SiriusMsgCapability,
@@ -9,9 +12,12 @@ import type {
   SiriusMsgEditContent,
   SiriusMsgFeature,
   SiriusMsgHealth,
+  SiriusMsgHistoryPage,
+  SiriusMsgHistorySearchRequest,
   SiriusMsgMessageEffectContent,
   SiriusMsgOutboundAttachment,
   SiriusMsgReaction,
+  SiriusMsgReactionAction,
   SiriusMsgReplyContent,
   SiriusMsgRichLink,
   SiriusMsgSendRequest,
@@ -24,7 +30,15 @@ import type {
   SiriusMsgTypingState,
   SiriusMsgUnsendContent,
 } from "./_models.js";
-import { SiriusMsgTransportError, UnsupportedContentError, serviceError } from "./errors.js";
+import {
+  AttachmentHashMismatchError,
+  AttachmentSizeMismatchError,
+  SiriusMsgSendOutcomeUnknownError,
+  SiriusMsgServiceErrorResponse,
+  SiriusMsgTransportError,
+  UnsupportedContentError,
+  serviceError,
+} from "./errors.js";
 import {
   Endpoint,
   NDJSONConnection,
@@ -50,20 +64,32 @@ export function richLinkContent(richLink: SiriusMsgRichLink): SiriusMsgContent {
   return { kind: "richLink", richLink };
 }
 
-export function attachmentContent(attachment: SiriusMsgOutboundAttachment): SiriusMsgContent {
+export function attachmentContent(
+  attachment: SiriusMsgOutboundAttachment,
+): SiriusMsgContent {
   return { kind: "attachment", attachment };
 }
 
-export function reactionContent(targetMessageID: string, reaction: SiriusMsgReaction, action = "added" as const): SiriusMsgContent {
+export function reactionContent(
+  targetMessageID: string,
+  reaction: SiriusMsgReaction,
+  action: SiriusMsgReactionAction = "added",
+): SiriusMsgContent {
   return { kind: "reaction", reaction: { targetMessageID, reaction, action } };
 }
 
-export function replyContent(targetMessageID: string, text: string): SiriusMsgContent {
+export function replyContent(
+  targetMessageID: string,
+  text: string,
+): SiriusMsgContent {
   const reply: SiriusMsgReplyContent = { targetMessageID, text };
   return { kind: "reply", reply };
 }
 
-export function editContent(targetMessageID: string, replacementText: string): SiriusMsgContent {
+export function editContent(
+  targetMessageID: string,
+  replacementText: string,
+): SiriusMsgContent {
   const edit: SiriusMsgEditContent = { targetMessageID, replacementText };
   return { kind: "edit", edit };
 }
@@ -73,12 +99,17 @@ export function unsendContent(targetMessageID: string): SiriusMsgContent {
   return { kind: "unsend", unsend };
 }
 
-export function messageEffectContent(text: string, effectName: string): SiriusMsgContent {
+export function messageEffectContent(
+  text: string,
+  effectName: string,
+): SiriusMsgContent {
   const messageEffect: SiriusMsgMessageEffectContent = { text, effectName };
   return { kind: "messageEffect", messageEffect };
 }
 
 export class SiriusMsgClient {
+  private tokenPath?: string;
+  private connectionID?: string;
   private subscriptionConnection?: NDJSONConnection;
   private subscriptionPending?: Map<string, PendingSubscriptionResponse>;
 
@@ -87,13 +118,41 @@ export class SiriusMsgClient {
     private authToken: string,
   ) {}
 
-  static async connect(opts: { socketPath?: string; tokenPath?: string } = {}): Promise<SiriusMsgClient> {
+  static async connect(
+    opts: {
+      socketPath?: string;
+      tokenPath?: string;
+      connectionID?: string;
+    } = {},
+  ): Promise<SiriusMsgClient> {
+    if (
+      opts.connectionID !== undefined &&
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        opts.connectionID,
+      )
+    ) {
+      throw new TypeError("connectionID must be a UUID");
+    }
     const client = new SiriusMsgClient(
       { socketPath: opts.socketPath ?? defaultSocketPath },
       await loadAuthToken(opts.tokenPath ?? defaultTokenPath),
     );
+    client.tokenPath = opts.tokenPath ?? defaultTokenPath;
+    client.connectionID = opts.connectionID?.toLowerCase();
     await client.health();
     return client;
+  }
+
+  private async currentAuthToken(): Promise<string> {
+    if (this.tokenPath !== undefined) {
+      this.authToken = await loadAuthToken(this.tokenPath);
+    }
+    if (this.connectionID !== undefined) {
+      return createHmac("sha256", this.authToken)
+        .update(`SiriusMsg.connection.v1:${this.connectionID}`)
+        .digest("base64");
+    }
+    return this.authToken;
   }
 
   static loopback(opts: { port: number; authToken: string }): SiriusMsgClient {
@@ -108,7 +167,9 @@ export class SiriusMsgClient {
     return response.health;
   }
 
-  async capabilities(transport: SiriusMsgTransport = "localMessagesAutomation"): Promise<SiriusMsgCapability[]> {
+  async capabilities(
+    transport: SiriusMsgTransport = "localMessagesAutomation",
+  ): Promise<SiriusMsgCapability[]> {
     const response = await this.perform("capabilities", { transport });
     if (response.kind !== "capabilities" || !response.capabilities) {
       throw new SiriusMsgTransportError("unexpected capabilities response");
@@ -117,52 +178,246 @@ export class SiriusMsgClient {
   }
 
   async send(request: SiriusMsgSendRequest): Promise<SiriusMsgSendResult> {
-    const response = await this.perform("send", { sendRequest: request });
+    const operationID = request.operationID ?? randomUUID();
+    const sendRequest = { ...request, operationID };
+    let response: SiriusMsgServiceResponse;
+    try {
+      response = await this.perform("send", { sendRequest }, operationID);
+    } catch (error) {
+      if (
+        error instanceof SiriusMsgServiceErrorResponse &&
+        [
+          "authFailed",
+          "authRequired",
+          "invalidRequest",
+          "peerCredentialsRejected",
+          "protocolVersionUnsupported",
+        ].includes(error.code)
+      ) {
+        return {
+          accepted: false,
+          confirmationState: "notRequested",
+          diagnosticCode: error.diagnosticCode ?? error.code,
+        };
+      }
+      throw new SiriusMsgSendOutcomeUnknownError(operationID, { cause: error });
+    }
     if (response.kind !== "sendResult" || !response.sendResult) {
       throw new SiriusMsgTransportError("unexpected send response");
     }
     return response.sendResult;
   }
 
-  async sendContent(chatID: string, content: SiriusMsgContent, accountID?: string): Promise<SiriusMsgSendResult> {
-    await this.checkSupported(content);
-    return this.send({ chatID, text: fallbackText(content), accountID, content });
+  async listAllowedChats(
+    searchText?: string,
+    limit = 20,
+  ): Promise<SiriusMsgAllowlistCandidate[]> {
+    const response = await this.perform("listAllowedChats", {
+      allowedChatQuery: { searchText, limit },
+    });
+    if (response.kind !== "allowedChats" || !response.allowedChats) {
+      throw new SiriusMsgTransportError("unexpected allowed chats response");
+    }
+    return response.allowedChats;
   }
 
-  async sendText(chatID: string, text: string, accountID?: string): Promise<SiriusMsgSendResult> {
+  async readHistory(
+    chatID: string,
+    beforeRowID?: number,
+    limit = 50,
+  ): Promise<SiriusMsgHistoryPage> {
+    const response = await this.perform("readHistory", {
+      historyRead: { chatID, beforeRowID, limit },
+    });
+    if (response.kind !== "historyPage" || !response.historyPage) {
+      throw new SiriusMsgTransportError("unexpected history response");
+    }
+    return response.historyPage;
+  }
+
+  async searchHistory(
+    query: string,
+    opts: { chatIDs?: string[]; beforeRowID?: number; limit?: number } = {},
+  ): Promise<SiriusMsgHistoryPage> {
+    if ((opts.chatIDs?.length ?? 0) > 20) {
+      throw new RangeError("chatIDs must contain at most 20 entries");
+    }
+    const historySearch: SiriusMsgHistorySearchRequest = {
+      query,
+      chatIDs: opts.chatIDs,
+      beforeRowID: opts.beforeRowID,
+      limit: opts.limit ?? 50,
+    };
+    const response = await this.perform("searchHistory", {
+      historySearch,
+    });
+    if (response.kind !== "historyPage" || !response.historyPage) {
+      throw new SiriusMsgTransportError("unexpected history response");
+    }
+    return response.historyPage;
+  }
+
+  async sendContent(
+    chatID: string,
+    content: SiriusMsgContent,
+    accountID?: string,
+    operationID?: string,
+  ): Promise<SiriusMsgSendResult> {
+    await this.checkSupported(content);
+    return this.send({
+      chatID,
+      text: fallbackText(content),
+      accountID,
+      operationID,
+      content,
+    });
+  }
+
+  async sendText(
+    chatID: string,
+    text: string,
+    accountID?: string,
+  ): Promise<SiriusMsgSendResult> {
     return this.sendContent(chatID, textContent(text), accountID);
   }
 
-  async sendRichLink(chatID: string, richLink: SiriusMsgRichLink, accountID?: string): Promise<SiriusMsgSendResult> {
+  async sendRichLink(
+    chatID: string,
+    richLink: SiriusMsgRichLink,
+    accountID?: string,
+  ): Promise<SiriusMsgSendResult> {
     return this.sendContent(chatID, richLinkContent(richLink), accountID);
   }
 
-  async sendAttachment(chatID: string, attachment: SiriusMsgOutboundAttachment, accountID?: string): Promise<SiriusMsgSendResult> {
+  /** Send a Mac-local file; the service authorizes, stages and hashes it. */
+  async sendFile(
+    chatID: string,
+    path: string,
+    mimeType: string,
+    options: {
+      displayName?: string;
+      accountID?: string;
+      operationID?: string;
+    } = {},
+  ): Promise<SiriusMsgSendResult> {
+    return this.sendContent(
+      chatID,
+      attachmentContent({
+        fileURL: pathToFileURL(path).href,
+        mimeType,
+        displayName: options.displayName,
+        byteCount: 0,
+        sha256: "",
+      }),
+      options.accountID,
+      options.operationID,
+    );
+  }
+
+  async sendAttachment(
+    chatID: string,
+    attachment: SiriusMsgOutboundAttachment,
+    accountID?: string,
+  ): Promise<SiriusMsgSendResult> {
     return this.sendContent(chatID, attachmentContent(attachment), accountID);
   }
 
-  async sendReaction(chatID: string, targetMessageID: string, reaction: SiriusMsgReaction, accountID?: string): Promise<SiriusMsgSendResult> {
-    return this.sendContent(chatID, reactionContent(targetMessageID, reaction), accountID);
+  async sendReaction(
+    chatID: string,
+    targetMessageID: string,
+    reaction: SiriusMsgReaction,
+    accountID?: string,
+    action: SiriusMsgReactionAction = "added",
+  ): Promise<SiriusMsgSendResult> {
+    return this.sendContent(
+      chatID,
+      reactionContent(targetMessageID, reaction, action),
+      accountID,
+    );
   }
 
-  async sendThreadedReply(chatID: string, targetMessageID: string, text: string, accountID?: string): Promise<SiriusMsgSendResult> {
-    return this.sendContent(chatID, replyContent(targetMessageID, text), accountID);
+  async sendThreadedReply(
+    chatID: string,
+    targetMessageID: string,
+    text: string,
+    accountID?: string,
+  ): Promise<SiriusMsgSendResult> {
+    return this.sendContent(
+      chatID,
+      replyContent(targetMessageID, text),
+      accountID,
+    );
   }
 
-  async sendEdit(chatID: string, targetMessageID: string, replacementText: string, accountID?: string): Promise<SiriusMsgSendResult> {
-    return this.sendContent(chatID, editContent(targetMessageID, replacementText), accountID);
+  async sendEdit(
+    chatID: string,
+    targetMessageID: string,
+    replacementText: string,
+    accountID?: string,
+  ): Promise<SiriusMsgSendResult> {
+    return this.sendContent(
+      chatID,
+      editContent(targetMessageID, replacementText),
+      accountID,
+    );
   }
 
-  async sendUnsend(chatID: string, targetMessageID: string, accountID?: string): Promise<SiriusMsgSendResult> {
+  async sendUnsend(
+    chatID: string,
+    targetMessageID: string,
+    accountID?: string,
+  ): Promise<SiriusMsgSendResult> {
     return this.sendContent(chatID, unsendContent(targetMessageID), accountID);
   }
 
-  async sendTyping(chatID: string, state: SiriusMsgTypingState, accountID?: string): Promise<SiriusMsgSendResult> {
-    return this.sendContent(chatID, { kind: "typing", typing: state }, accountID);
+  /** Prepare inside the scope; send text/files after it returns and typing stops. */
+  async withTypingIndicator<T>(
+    chatID: string,
+    prepare: () => Promise<T>,
+    options: { signal?: AbortSignal } = {},
+  ): Promise<T> {
+    options.signal?.throwIfAborted();
+    const available = await this.capabilities().then(
+      (items) =>
+        items.some(
+          (item) =>
+            item.feature === "sendTypingIndicator" &&
+            item.support === "supported",
+        ),
+      () => false,
+    );
+    options.signal?.throwIfAborted();
+    if (!available) return prepare();
+    return managedTyping(
+      (state) => this.sendTyping(chatID, state),
+      prepare,
+      options.signal,
+    );
   }
 
-  async sendMessageEffect(chatID: string, text: string, effectName: string, accountID?: string): Promise<SiriusMsgSendResult> {
-    return this.sendContent(chatID, messageEffectContent(text, effectName), accountID);
+  async sendTyping(
+    chatID: string,
+    state: SiriusMsgTypingState,
+    accountID?: string,
+  ): Promise<SiriusMsgSendResult> {
+    return this.sendContent(
+      chatID,
+      { kind: "typing", typing: state },
+      accountID,
+    );
+  }
+
+  async sendMessageEffect(
+    chatID: string,
+    text: string,
+    effectName: string,
+    accountID?: string,
+  ): Promise<SiriusMsgSendResult> {
+    return this.sendContent(
+      chatID,
+      messageEffectContent(text, effectName),
+      accountID,
+    );
   }
 
   async updateAllowlist(allowlist: SiriusMsgAllowlist): Promise<void> {
@@ -174,7 +429,10 @@ export class SiriusMsgClient {
 
   async rotateAuthToken(): Promise<SiriusMsgAuthTokenRotationResult> {
     const response = await this.perform("rotateAuthToken");
-    if (response.kind !== "authTokenRotated" || !response.authTokenRotationResult) {
+    if (
+      response.kind !== "authTokenRotated" ||
+      !response.authTokenRotationResult
+    ) {
       throw new SiriusMsgTransportError("unexpected token rotation response");
     }
     this.authToken = response.authTokenRotationResult.token;
@@ -191,9 +449,11 @@ export class SiriusMsgClient {
         kind: "ack",
         ack,
       };
-      const responsePromise = new Promise<SiriusMsgServiceResponse>((resolve, reject) => {
-        subscriptionPending.set(frame.requestID, { resolve, reject });
-      });
+      const responsePromise = new Promise<SiriusMsgServiceResponse>(
+        (resolve, reject) => {
+          subscriptionPending.set(frame.requestID, { resolve, reject });
+        },
+      );
       try {
         await subscriptionConnection.write(frame);
       } catch (error) {
@@ -214,7 +474,9 @@ export class SiriusMsgClient {
   }
 
   async fetchAttachment(id: string): Promise<SiriusMsgAttachmentFileReference> {
-    const response = await this.perform("fetchAttachment", { attachmentFetch: { attachmentID: id } });
+    const response = await this.perform("fetchAttachment", {
+      attachmentFetch: { attachmentID: id },
+    });
     if (response.kind !== "attachmentFile" || !response.attachmentFile) {
       throw new SiriusMsgTransportError("unexpected attachment response");
     }
@@ -225,15 +487,28 @@ export class SiriusMsgClient {
     const file = await this.fetchAttachment(id);
     const bytes = await readFile(file.localFilePath);
     if (bytes.length !== file.metadata.byteCount) {
-      throw new SiriusMsgTransportError("attachment byte count does not match");
+      throw new AttachmentSizeMismatchError(
+        id,
+        file.metadata.byteCount,
+        bytes.length,
+      );
     }
-    if (file.metadata.sha256 && createHash("sha256").update(bytes).digest("hex") !== file.metadata.sha256) {
-      throw new SiriusMsgTransportError("attachment hash does not match");
+    if (file.metadata.sha256) {
+      const actualSHA256 = createHash("sha256").update(bytes).digest("hex");
+      if (actualSHA256 !== file.metadata.sha256) {
+        throw new AttachmentHashMismatchError(
+          id,
+          file.metadata.sha256,
+          actualSHA256,
+        );
+      }
     }
     return bytes;
   }
 
-  async *subscribe(opts: { supportsAttachments?: boolean; reconnect?: boolean } = {}): AsyncIterableIterator<SiriusMsgServiceEvent> {
+  async *subscribe(
+    opts: { supportsAttachments?: boolean; reconnect?: boolean } = {},
+  ): AsyncIterableIterator<SiriusMsgServiceEvent> {
     let backoff = 100;
     while (true) {
       const connection = new NDJSONConnection(this.endpoint);
@@ -241,12 +516,14 @@ export class SiriusMsgClient {
       const events = new AsyncSubscriptionQueue<SiriusMsgServiceEvent>();
       try {
         await connection.open();
-        await connection.authenticate(this.authToken);
+        await connection.authenticate(await this.currentAuthToken());
         await connection.write({
           protocolVersion,
           requestID: requestID("subscribe"),
           kind: "subscribe",
-          subscriptionOptions: { supportsAttachments: opts.supportsAttachments ?? false },
+          subscriptionOptions: {
+            supportsAttachments: opts.supportsAttachments ?? false,
+          },
         });
         const subscribed = await connection.readResponse();
         this.raiseIfError(subscribed);
@@ -260,7 +537,7 @@ export class SiriusMsgClient {
           yield await events.next();
         }
       } catch (error) {
-        if (!opts.reconnect) {
+        if (!opts.reconnect || !(error instanceof SiriusMsgTransportError)) {
           throw error;
         }
         await new Promise((resolve) => setTimeout(resolve, backoff));
@@ -270,7 +547,10 @@ export class SiriusMsgClient {
           this.subscriptionConnection = undefined;
           this.subscriptionPending = undefined;
         }
-        this.rejectSubscriptionPending(pending, new SiriusMsgTransportError("subscription closed"));
+        this.rejectSubscriptionPending(
+          pending,
+          new SiriusMsgTransportError("subscription closed"),
+        );
         events.fail(new SiriusMsgTransportError("subscription closed"));
         connection.close();
       }
@@ -323,21 +603,28 @@ export class SiriusMsgClient {
     return false;
   }
 
-  private rejectSubscriptionPending(pending: Map<string, PendingSubscriptionResponse>, error: unknown): void {
+  private rejectSubscriptionPending(
+    pending: Map<string, PendingSubscriptionResponse>,
+    error: unknown,
+  ): void {
     for (const waiter of pending.values()) {
       waiter.reject(error);
     }
     pending.clear();
   }
 
-  private async perform(kind: SiriusMsgServiceRequest["kind"], payload: Partial<SiriusMsgServiceRequest> = {}): Promise<SiriusMsgServiceResponse> {
+  private async perform(
+    kind: SiriusMsgServiceRequest["kind"],
+    payload: Partial<SiriusMsgServiceRequest> = {},
+    stableRequestID?: string,
+  ): Promise<SiriusMsgServiceResponse> {
     const connection = new NDJSONConnection(this.endpoint);
     await connection.open();
     try {
-      await connection.authenticate(this.authToken);
+      await connection.authenticate(await this.currentAuthToken());
       const frame: SiriusMsgServiceRequest = {
         protocolVersion,
-        requestID: requestID(kind),
+        requestID: stableRequestID ?? requestID(kind),
         kind,
         ...payload,
       };
@@ -345,7 +632,9 @@ export class SiriusMsgClient {
       const response = await connection.readResponse();
       this.raiseIfError(response);
       if (response.requestID && response.requestID !== frame.requestID) {
-        throw new SiriusMsgTransportError("response requestID did not match request");
+        throw new SiriusMsgTransportError(
+          "response requestID did not match request",
+        );
       }
       return response;
     } finally {
@@ -356,25 +645,41 @@ export class SiriusMsgClient {
   private async checkSupported(content: SiriusMsgContent): Promise<void> {
     const feature = featureForContent(content);
     const caps = await this.capabilities();
-    const cap = caps.find((item) => item.feature === feature && item.transport === "localMessagesAutomation");
+    const cap = caps.find(
+      (item) =>
+        item.feature === feature &&
+        item.transport === "localMessagesAutomation",
+    );
     if (!cap) {
       throw new UnsupportedContentError(feature, unsupportedLocalDiagnostic);
     }
-    if (["unsupported", "researchGated", "providerOnly"].includes(cap.support)) {
-      throw new UnsupportedContentError(feature, cap.diagnosticCode ?? unsupportedLocalDiagnostic);
+    if (
+      ["unsupported", "researchGated", "providerOnly"].includes(cap.support)
+    ) {
+      throw new UnsupportedContentError(
+        feature,
+        cap.diagnosticCode ?? unsupportedLocalDiagnostic,
+      );
     }
   }
 
   private raiseIfError(response: SiriusMsgServiceResponse): void {
     if (response.kind === "error" && response.error) {
-      throw serviceError(response.error.code, response.error.message, response.error.diagnosticCode);
+      throw serviceError(
+        response.error.code,
+        response.error.message,
+        response.error.diagnosticCode,
+      );
     }
   }
 }
 
 class AsyncSubscriptionQueue<T> {
   private values: T[] = [];
-  private waiters: Array<{ resolve: (value: T) => void; reject: (error: unknown) => void }> = [];
+  private waiters: Array<{
+    resolve: (value: T) => void;
+    reject: (error: unknown) => void;
+  }> = [];
   private failure?: unknown;
 
   push(value: T): void {
@@ -444,6 +749,7 @@ function fallbackText(content: SiriusMsgContent): string {
   if (content.kind === "richLink") return content.richLink?.url ?? "";
   if (content.kind === "reply") return content.reply?.text ?? "";
   if (content.kind === "edit") return content.edit?.replacementText ?? "";
-  if (content.kind === "messageEffect") return content.messageEffect?.text ?? "";
+  if (content.kind === "messageEffect")
+    return content.messageEffect?.text ?? "";
   return "";
 }

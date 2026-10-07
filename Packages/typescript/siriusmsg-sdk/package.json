@@ -18,6 +18,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json && cp src/_schema.json dist/_schema.json",
+    "format": "prettier --write src/control.ts tests/control.test.ts src/client.ts src/typing.ts src/errors.ts src/transport.ts src/validate.ts tests/sdk.test.ts tests/typing.test.ts tests/adapter-example.test.ts examples/adapter.ts",
+    "format:check": "prettier --check src/control.ts tests/control.test.ts src/client.ts src/typing.ts src/errors.ts src/transport.ts src/validate.ts tests/sdk.test.ts tests/typing.test.ts tests/adapter-example.test.ts examples/adapter.ts",
     "test": "vitest run"
   },
   "dependencies": {

@@ -27,5 +27,6 @@ packages = ["src/siriusmsg_sdk"]
 testpaths = ["tests"]
 
 [tool.ruff]
+extend-exclude = ["src/siriusmsg_sdk/_models.py"]
 line-length = 120
 target-version = "py310"

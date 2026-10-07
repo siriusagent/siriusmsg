@@ -13,6 +13,14 @@ class SiriusMsgTransportError(SiriusMsgSDKError):
     """Socket, framing, or local transport failure."""
 
 
+class SiriusMsgSendOutcomeUnknownError(SiriusMsgTransportError):
+    """A send may have reached the service; retry with the same operation ID."""
+
+    def __init__(self, operation_id: str) -> None:
+        self.operation_id = operation_id
+        super().__init__(f"send outcome unknown; retry with operation ID {operation_id}")
+
+
 class SiriusMsgMalformedFrameError(SiriusMsgTransportError):
     """A peer returned malformed JSON or a frame that failed validation."""
 
@@ -94,6 +102,28 @@ class AttachmentNotDeliveredError(SiriusMsgServiceErrorResponse):
 class AttachmentUnavailableError(SiriusMsgServiceErrorResponse):
     code = "attachmentUnavailable"
 
+    def __init__(
+        self,
+        message: str,
+        diagnostic_code: Optional[str] = None,
+        *,
+        attachment_id: Optional[str] = None,
+    ) -> None:
+        self.attachment_id = attachment_id
+        super().__init__(message, diagnostic_code)
+
+
+class AttachmentSizeMismatchError(AttachmentUnavailableError):
+    """The fetched file length did not match its authenticated metadata."""
+
+    def __init__(self, attachment_id: str, expected_byte_count: int, actual_byte_count: int) -> None:
+        self.expected_byte_count = expected_byte_count
+        self.actual_byte_count = actual_byte_count
+        super().__init__(
+            "attachment byte count does not match",
+            attachment_id=attachment_id,
+        )
+
 
 class AttachmentTransportUnsupportedError(SiriusMsgServiceErrorResponse):
     code = "attachmentTransportUnsupported"
@@ -101,6 +131,20 @@ class AttachmentTransportUnsupportedError(SiriusMsgServiceErrorResponse):
 
 class AttachmentHashMismatchError(SiriusMsgServiceErrorResponse):
     code = "attachmentHashMismatch"
+
+    def __init__(
+        self,
+        message: str,
+        diagnostic_code: Optional[str] = None,
+        *,
+        attachment_id: Optional[str] = None,
+        expected_sha256: Optional[str] = None,
+        actual_sha256: Optional[str] = None,
+    ) -> None:
+        self.attachment_id = attachment_id
+        self.expected_sha256 = expected_sha256
+        self.actual_sha256 = actual_sha256
+        super().__init__(message, diagnostic_code)
 
 
 class AttachmentTooLargeError(SiriusMsgServiceErrorResponse):
@@ -145,3 +189,16 @@ ERROR_BY_CODE: dict[str, Type[SiriusMsgServiceErrorResponse]] = {
 def error_from_service(code: str, message: str, diagnostic_code: Optional[str] = None) -> SiriusMsgServiceErrorResponse:
     error_type = ERROR_BY_CODE.get(code, SiriusMsgServiceErrorResponse)
     return error_type(message, diagnostic_code)
+
+
+class SiriusMsgTypingCleanupError(SiriusMsgSDKError):
+    """Reserved compatibility type; managed typing scopes do not raise it.
+
+    Managed typing is advisory, so typing start/stop failures never surface here.
+    Inspect ``SiriusMsgSendResult.confirmationState`` for delivery facts.
+    """
+
+    requires_review = True
+
+    def __init__(self) -> None:
+        super().__init__("Typing cleanup could not be verified. Check Messages before retrying.")

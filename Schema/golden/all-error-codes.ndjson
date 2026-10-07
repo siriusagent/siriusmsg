@@ -7,6 +7,9 @@
 {"error":{"code":"subscriptionAlreadyActive","diagnosticCode":"diagnostic-subscriptionAlreadyActive","message":"subscriptionAlreadyActive"},"kind":"error","protocolVersion":1,"requestID":"error-subscriptionAlreadyActive"}
 {"error":{"code":"backpressure","diagnosticCode":"diagnostic-backpressure","message":"backpressure"},"kind":"error","protocolVersion":1,"requestID":"error-backpressure"}
 {"error":{"code":"sendRejected","diagnosticCode":"diagnostic-sendRejected","message":"sendRejected"},"kind":"error","protocolVersion":1,"requestID":"error-sendRejected"}
+{"error":{"code":"historyUnavailable","diagnosticCode":"diagnostic-historyUnavailable","message":"historyUnavailable"},"kind":"error","protocolVersion":1,"requestID":"error-historyUnavailable"}
+{"error":{"code":"sendOperationConflict","diagnosticCode":"diagnostic-sendOperationConflict","message":"sendOperationConflict"},"kind":"error","protocolVersion":1,"requestID":"error-sendOperationConflict"}
+{"error":{"code":"sendOperationUnresolved","diagnosticCode":"diagnostic-sendOperationUnresolved","message":"sendOperationUnresolved"},"kind":"error","protocolVersion":1,"requestID":"error-sendOperationUnresolved"}
 {"error":{"code":"peerCredentialsRejected","diagnosticCode":"diagnostic-peerCredentialsRejected","message":"peerCredentialsRejected"},"kind":"error","protocolVersion":1,"requestID":"error-peerCredentialsRejected"}
 {"error":{"code":"tokenRotationFailed","diagnosticCode":"diagnostic-tokenRotationFailed","message":"tokenRotationFailed"},"kind":"error","protocolVersion":1,"requestID":"error-tokenRotationFailed"}
 {"error":{"code":"transportUnavailable","diagnosticCode":"diagnostic-transportUnavailable","message":"transportUnavailable"},"kind":"error","protocolVersion":1,"requestID":"error-transportUnavailable"}

@@ -7,10 +7,10 @@ protocol SDKs in this repository.
 
 ## Download
 
-Download the latest notarized DMG from:
+Get the latest notarized DMG from the release page:
 
 ```text
-https://github.com/siriusagent/siriusmsg/releases/latest/download/SiriusMsg-notarized.dmg
+https://github.com/siriusagent/siriusmsg/releases/latest
 ```
 
 The latest release page is:

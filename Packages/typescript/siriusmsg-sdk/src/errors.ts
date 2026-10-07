@@ -2,7 +2,39 @@ export class SiriusMsgSDKError extends Error {}
 
 export class SiriusMsgTransportError extends SiriusMsgSDKError {}
 
+export class SiriusMsgSendOutcomeUnknownError extends SiriusMsgTransportError {
+  constructor(
+    public readonly operationID: string,
+    options?: ErrorOptions,
+  ) {
+    super(
+      `send outcome unknown; retry with operation ID ${operationID}`,
+      options,
+    );
+  }
+}
+
 export class SiriusMsgMalformedFrameError extends SiriusMsgTransportError {}
+
+export class AttachmentSizeMismatchError extends SiriusMsgTransportError {
+  constructor(
+    public readonly attachmentID: string,
+    public readonly expectedByteCount: number,
+    public readonly actualByteCount: number,
+  ) {
+    super("attachment byte count does not match");
+  }
+}
+
+export class AttachmentHashMismatchError extends SiriusMsgTransportError {
+  constructor(
+    public readonly attachmentID: string,
+    public readonly expectedSHA256: string,
+    public readonly actualSHA256: string,
+  ) {
+    super("attachment hash does not match");
+  }
+}
 
 export class UnsupportedContentError extends SiriusMsgSDKError {
   constructor(
@@ -23,7 +55,10 @@ export class SiriusMsgServiceErrorResponse extends SiriusMsgSDKError {
   }
 }
 
-export const errorClassByCode = new Map<string, typeof SiriusMsgServiceErrorResponse>([
+export const errorClassByCode = new Map<
+  string,
+  typeof SiriusMsgServiceErrorResponse
+>([
   ["authRequired", SiriusMsgServiceErrorResponse],
   ["authFailed", SiriusMsgServiceErrorResponse],
   ["protocolVersionUnsupported", SiriusMsgServiceErrorResponse],
@@ -46,7 +81,26 @@ export const errorClassByCode = new Map<string, typeof SiriusMsgServiceErrorResp
   ["internalError", SiriusMsgServiceErrorResponse],
 ]);
 
-export function serviceError(code: string, message: string, diagnosticCode?: string): SiriusMsgServiceErrorResponse {
+export function serviceError(
+  code: string,
+  message: string,
+  diagnosticCode?: string,
+): SiriusMsgServiceErrorResponse {
   const ErrorType = errorClassByCode.get(code) ?? SiriusMsgServiceErrorResponse;
   return new ErrorType(code, message, diagnosticCode);
+}
+
+/**
+ * Reserved compatibility type; managed typing scopes do not raise it. Managed
+ * typing is advisory, so inspect `SiriusMsgSendResult.confirmationState`
+ * instead of treating typing failures as delivery facts.
+ */
+export class SiriusMsgTypingCleanupError extends Error {
+  readonly requiresReview = true;
+  constructor() {
+    super(
+      "Typing cleanup could not be verified. Check Messages before retrying.",
+    );
+    this.name = "SiriusMsgTypingCleanupError";
+  }
 }

@@ -1,14 +1,20 @@
-"""Hand-written Python client for the SiriusMsg local protocol."""
+"""Hand-written Python client mirroring SiriusMsgKit."""
 
 from __future__ import annotations
 
 import asyncio
+import base64
 import hashlib
+import hmac
+import uuid
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncIterator, Optional
 
 from siriusmsg_sdk._models import (
     SiriusMsgAllowlist,
+    SiriusMsgAllowedChatQuery,
+    SiriusMsgAllowlistCandidate,
     SiriusMsgAttachmentFetchRequest,
     SiriusMsgAttachmentFileReference,
     SiriusMsgAttachmentID,
@@ -18,10 +24,12 @@ from siriusmsg_sdk._models import (
     SiriusMsgChatID,
     SiriusMsgContent,
     SiriusMsgContentKind,
+    SiriusMsgEditContent,
     SiriusMsgFeature,
     SiriusMsgHealth,
-    SiriusMsgImageRef,
-    SiriusMsgEditContent,
+    SiriusMsgHistoryPage,
+    SiriusMsgHistoryReadRequest,
+    SiriusMsgHistorySearchRequest,
     SiriusMsgMessageEffectContent,
     SiriusMsgOutboundAttachment,
     SiriusMsgReaction,
@@ -52,8 +60,9 @@ from siriusmsg_sdk._transport import (
 )
 from siriusmsg_sdk.errors import (
     AttachmentHashMismatchError,
-    AttachmentUnavailableError,
-    SiriusMsgSDKError,
+    AttachmentSizeMismatchError,
+    SiriusMsgSendOutcomeUnknownError,
+    SiriusMsgServiceErrorResponse,
     SiriusMsgTransportError,
     UnsupportedContentError,
     error_from_service,
@@ -117,6 +126,8 @@ class SiriusMsgClient:
     def __init__(self, endpoint: Endpoint, auth_token: str) -> None:
         self._endpoint = endpoint
         self._auth_token = auth_token
+        self._token_path: str | Path | None = None
+        self._connection_id: uuid.UUID | None = None
         self._subscription_connection: NDJSONConnection | None = None
         self._subscription_reader_task: asyncio.Task[None] | None = None
         self._subscription_events: asyncio.Queue[SiriusMsgServiceEvent | BaseException] | None = None
@@ -129,8 +140,12 @@ class SiriusMsgClient:
         *,
         socket_path: str | Path = DEFAULT_SOCKET_PATH,
         token_path: str | Path = DEFAULT_TOKEN_PATH,
+        connection_id: str | uuid.UUID | None = None,
     ) -> "SiriusMsgClient":
+        profile_id = uuid.UUID(str(connection_id)) if connection_id is not None else None
         client = cls(Endpoint.unix(socket_path), load_auth_token(token_path))
+        client._connection_id = profile_id
+        client._token_path = token_path
         await client.health()
         return client
 
@@ -154,16 +169,82 @@ class SiriusMsgClient:
         return response.capabilities
 
     async def send(self, request: SiriusMsgSendRequest) -> SiriusMsgSendResult:
-        response = await self._perform("send", sendRequest=request)
+        operation_id = request.operationID or str(uuid.uuid4())
+        request = request.model_copy(update={"operationID": operation_id})
+        try:
+            response = await self._perform("send", request_id_value=operation_id, sendRequest=request)
+        except SiriusMsgServiceErrorResponse as error:
+            if error.code in {
+                "authFailed",
+                "authRequired",
+                "invalidRequest",
+                "peerCredentialsRejected",
+                "protocolVersionUnsupported",
+            }:
+                return SiriusMsgSendResult(
+                    accepted=False,
+                    confirmationState="notRequested",
+                    diagnosticCode=error.diagnostic_code or error.code,
+                )
+            raise SiriusMsgSendOutcomeUnknownError(operation_id) from error
+        except Exception as error:
+            raise SiriusMsgSendOutcomeUnknownError(operation_id) from error
         if response.kind.value != "sendResult" or response.sendResult is None:
             raise SiriusMsgTransportError("unexpected send response")
         return response.sendResult
+
+    async def list_allowed_chats(
+        self, search_text: Optional[str] = None, limit: int = 20
+    ) -> list[SiriusMsgAllowlistCandidate]:
+        response = await self._perform(
+            "listAllowedChats",
+            allowedChatQuery=SiriusMsgAllowedChatQuery(searchText=search_text, limit=limit),
+        )
+        if response.kind.value != "allowedChats" or response.allowedChats is None:
+            raise SiriusMsgTransportError("unexpected allowed chats response")
+        return response.allowedChats
+
+    async def read_history(
+        self,
+        chat_id: str | SiriusMsgChatID,
+        before_row_id: Optional[int] = None,
+        limit: int = 50,
+    ) -> SiriusMsgHistoryPage:
+        response = await self._perform(
+            "readHistory",
+            historyRead=SiriusMsgHistoryReadRequest(chatID=_chat_id(chat_id), beforeRowID=before_row_id, limit=limit),
+        )
+        if response.kind.value != "historyPage" or response.historyPage is None:
+            raise SiriusMsgTransportError("unexpected history response")
+        return response.historyPage
+
+    async def search_history(
+        self,
+        query: str,
+        chat_ids: Optional[list[str | SiriusMsgChatID]] = None,
+        before_row_id: Optional[int] = None,
+        limit: int = 50,
+    ) -> SiriusMsgHistoryPage:
+        response = await self._perform(
+            "searchHistory",
+            historySearch=SiriusMsgHistorySearchRequest(
+                query=query,
+                chatIDs=[_chat_id(value) for value in chat_ids] if chat_ids is not None else None,
+                beforeRowID=before_row_id,
+                limit=limit,
+            ),
+        )
+        if response.kind.value != "historyPage" or response.historyPage is None:
+            raise SiriusMsgTransportError("unexpected history response")
+        return response.historyPage
 
     async def send_content(
         self,
         chat_id: str | SiriusMsgChatID,
         content: SiriusMsgContent,
         account_id: Optional[str] = None,
+        *,
+        operation_id: Optional[str] = None,
     ) -> SiriusMsgSendResult:
         await self._check_supported(content)
         return await self.send(
@@ -171,11 +252,14 @@ class SiriusMsgClient:
                 chatID=_chat_id(chat_id),
                 text=_fallback_text(content),
                 accountID=account_id,
+                operationID=operation_id,
                 content=content,
             )
         )
 
-    async def send_text(self, chat_id: str | SiriusMsgChatID, text: str, account_id: Optional[str] = None) -> SiriusMsgSendResult:
+    async def send_text(
+        self, chat_id: str | SiriusMsgChatID, text: str, account_id: Optional[str] = None
+    ) -> SiriusMsgSendResult:
         return await self.send_content(chat_id, text_content(text), account_id)
 
     async def send_rich_link(
@@ -185,6 +269,26 @@ class SiriusMsgClient:
         account_id: Optional[str] = None,
     ) -> SiriusMsgSendResult:
         return await self.send_content(chat_id, rich_link_content(rich_link), account_id)
+
+    async def send_file(
+        self,
+        chat_id: str | SiriusMsgChatID,
+        path: str | Path,
+        mime_type: str,
+        *,
+        display_name: Optional[str] = None,
+        account_id: Optional[str] = None,
+        operation_id: Optional[str] = None,
+    ) -> SiriusMsgSendResult:
+        """Send a Mac-local file; the service authorizes, stages and hashes it."""
+        attachment = SiriusMsgOutboundAttachment(
+            fileURL=Path(path).expanduser().absolute().as_uri(),
+            mimeType=mime_type,
+            displayName=display_name,
+            byteCount=0,
+            sha256="",
+        )
+        return await self.send_content(chat_id, attachment_content(attachment), account_id, operation_id=operation_id)
 
     async def send_attachment(
         self,
@@ -200,8 +304,10 @@ class SiriusMsgClient:
         target_message_id: str,
         reaction: SiriusMsgReaction,
         account_id: Optional[str] = None,
+        *,
+        action: SiriusMsgReactionAction = SiriusMsgReactionAction.added,
     ) -> SiriusMsgSendResult:
-        return await self.send_content(chat_id, reaction_content(target_message_id, reaction), account_id)
+        return await self.send_content(chat_id, reaction_content(target_message_id, reaction, action), account_id)
 
     async def send_threaded_reply(
         self,
@@ -229,13 +335,34 @@ class SiriusMsgClient:
     ) -> SiriusMsgSendResult:
         return await self.send_content(chat_id, unsend_content(target_message_id), account_id)
 
+    @asynccontextmanager
+    async def typing(self, chat_id: str | SiriusMsgChatID) -> AsyncIterator[None]:
+        """Prepare a reply inside this scope; send it after typing stops on exit."""
+        from siriusmsg_sdk._typing import managed_typing
+
+        try:
+            available = any(
+                item.feature == SiriusMsgFeature.sendTypingIndicator
+                and item.support == SiriusMsgCapabilitySupport.supported
+                for item in await self.capabilities()
+            )
+        except Exception:
+            available = False
+        if not available:
+            yield
+            return
+        async with managed_typing(lambda state: self.send_typing(chat_id, state)):
+            yield
+
     async def send_typing(
         self,
         chat_id: str | SiriusMsgChatID,
         state: SiriusMsgTypingState,
         account_id: Optional[str] = None,
     ) -> SiriusMsgSendResult:
-        return await self.send_content(chat_id, SiriusMsgContent(kind=SiriusMsgContentKind.typing, typing=state), account_id)
+        return await self.send_content(
+            chat_id, SiriusMsgContent(kind=SiriusMsgContentKind.typing, typing=state), account_id
+        )
 
     async def send_message_effect(
         self,
@@ -295,13 +422,25 @@ class SiriusMsgClient:
         return response.attachmentFile
 
     async def fetch_attachment_data(self, attachment_id: str | SiriusMsgAttachmentID) -> bytes:
-        file_ref = await self.fetch_attachment(attachment_id)
+        requested_id = _attachment_id(attachment_id)
+        file_ref = await self.fetch_attachment(requested_id)
         path = Path(file_ref.localFilePath)
         try_data = path.read_bytes()
         if len(try_data) != file_ref.metadata.byteCount:
-            raise AttachmentUnavailableError("attachment byte count does not match")
-        if file_ref.metadata.sha256 and hashlib.sha256(try_data).hexdigest() != file_ref.metadata.sha256:
-            raise AttachmentHashMismatchError("attachment hash does not match")
+            raise AttachmentSizeMismatchError(
+                requested_id.root,
+                file_ref.metadata.byteCount,
+                len(try_data),
+            )
+        if file_ref.metadata.sha256:
+            actual_sha256 = hashlib.sha256(try_data).hexdigest()
+            if actual_sha256 != file_ref.metadata.sha256:
+                raise AttachmentHashMismatchError(
+                    "attachment hash does not match",
+                    attachment_id=requested_id.root,
+                    expected_sha256=file_ref.metadata.sha256,
+                    actual_sha256=actual_sha256,
+                )
         return try_data
 
     async def subscribe(
@@ -316,7 +455,7 @@ class SiriusMsgClient:
             reader_task: asyncio.Task[None] | None = None
             try:
                 await connection.open()
-                await connection.authenticate(self._auth_token)
+                await connection.authenticate(self._current_auth_token())
                 await connection.write(
                     SiriusMsgServiceRequest(
                         protocolVersion=PROTOCOL_VERSION,
@@ -389,7 +528,9 @@ class SiriusMsgClient:
             if response_future is not None:
                 if response.kind.value == "error" and response.error is not None:
                     response_future.set_exception(
-                        error_from_service(response.error.code.value, response.error.message, response.error.diagnosticCode)
+                        error_from_service(
+                            response.error.code.value, response.error.message, response.error.diagnosticCode
+                        )
                     )
                 else:
                     response_future.set_result(response)
@@ -408,12 +549,23 @@ class SiriusMsgClient:
             if not response_future.done():
                 response_future.set_exception(error)
 
-    async def _perform(self, kind: str, **payload: object) -> SiriusMsgServiceResponse:
+    def _current_auth_token(self) -> str:
+        if self._token_path is not None:
+            self._auth_token = load_auth_token(self._token_path)
+        if self._connection_id is not None:
+            context = f"SiriusMsg.connection.v1:{self._connection_id}".encode()
+            digest = hmac.digest(self._auth_token.encode(), context, "sha256")
+            return base64.b64encode(digest).decode("ascii")
+        return self._auth_token
+
+    async def _perform(
+        self, kind: str, request_id_value: Optional[str] = None, **payload: object
+    ) -> SiriusMsgServiceResponse:
         async with NDJSONConnection(self._endpoint) as connection:
-            await connection.authenticate(self._auth_token)
+            await connection.authenticate(self._current_auth_token())
             request = SiriusMsgServiceRequest(
                 protocolVersion=PROTOCOL_VERSION,
-                requestID=request_id(kind),
+                requestID=request_id_value or request_id(kind),
                 kind=kind,
                 **payload,
             )

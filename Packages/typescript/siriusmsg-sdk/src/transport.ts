@@ -3,12 +3,26 @@ import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import type { SiriusMsgServiceRequest, SiriusMsgServiceResponse } from "./_models.js";
-import { SiriusMsgMalformedFrameError, SiriusMsgTransportError, serviceError } from "./errors.js";
+import type {
+  SiriusMsgServiceRequest,
+  SiriusMsgServiceResponse,
+} from "./_models.js";
+import {
+  SiriusMsgMalformedFrameError,
+  SiriusMsgTransportError,
+  serviceError,
+} from "./errors.js";
 import { validateRequest, validateResponse } from "./validate.js";
 
 export const protocolVersion = 1;
-export const defaultRuntimeDir = join(homedir(), "Library", "Application Support", "SiriusMsg");
+// The service and the Swift client cap one NDJSON frame at 1 MiB.
+const maximumFrameBytes = 1_048_576;
+export const defaultRuntimeDir = join(
+  homedir(),
+  "Library",
+  "Application Support",
+  "SiriusMsg",
+);
 export const defaultSocketPath = join(defaultRuntimeDir, "siriusmsg.sock");
 export const defaultTokenPath = join(defaultRuntimeDir, "service-token.json");
 
@@ -37,8 +51,12 @@ export function sortAndDropNullish(value: unknown): unknown {
   return value;
 }
 
-export async function loadAuthToken(tokenPath = defaultTokenPath): Promise<string> {
-  const parsed = JSON.parse(await readFile(tokenPath, "utf8")) as { token?: unknown };
+export async function loadAuthToken(
+  tokenPath = defaultTokenPath,
+): Promise<string> {
+  const parsed = JSON.parse(await readFile(tokenPath, "utf8")) as {
+    token?: unknown;
+  };
   if (typeof parsed.token !== "string" || parsed.token.length === 0) {
     throw new SiriusMsgTransportError(`auth token unavailable at ${tokenPath}`);
   }
@@ -56,13 +74,16 @@ export class NDJSONConnection {
   constructor(private readonly endpoint: Endpoint) {}
 
   async open(): Promise<void> {
-    this.socket = "socketPath" in this.endpoint
-      ? createConnection(this.endpoint.socketPath)
-      : createConnection({ host: "127.0.0.1", port: this.endpoint.port });
+    this.socket =
+      "socketPath" in this.endpoint
+        ? createConnection(this.endpoint.socketPath)
+        : createConnection({ host: "127.0.0.1", port: this.endpoint.port });
     this.socket.setEncoding("utf8");
     this.socket.on("data", (chunk) => this.receive(String(chunk)));
     this.socket.on("error", (error) => this.reject(error));
-    this.socket.on("close", () => this.reject(new SiriusMsgTransportError("connection closed")));
+    this.socket.on("close", () =>
+      this.reject(new SiriusMsgTransportError("connection closed")),
+    );
     await new Promise<void>((resolve, reject) => {
       this.socket?.once("connect", resolve);
       this.socket?.once("error", reject);
@@ -81,7 +102,11 @@ export class NDJSONConnection {
       return;
     }
     if (response.kind === "error" && response.error) {
-      throw serviceError(response.error.code, response.error.message, response.error.diagnosticCode);
+      throw serviceError(
+        response.error.code,
+        response.error.message,
+        response.error.diagnosticCode,
+      );
     }
     throw new SiriusMsgTransportError("authentication failed");
   }
@@ -122,6 +147,10 @@ export class NDJSONConnection {
       if (!line) {
         continue;
       }
+      if (Buffer.byteLength(line, "utf8") > maximumFrameBytes) {
+        this.rejectOversizedFrame();
+        return;
+      }
       try {
         const decoded = JSON.parse(line);
         validateResponse(decoded);
@@ -133,9 +162,25 @@ export class NDJSONConnection {
           this.responses.push(decoded);
         }
       } catch (error) {
-        this.reject(error instanceof Error ? error : new SiriusMsgMalformedFrameError(String(error)));
+        this.reject(
+          error instanceof Error
+            ? error
+            : new SiriusMsgMalformedFrameError(String(error)),
+        );
       }
     }
+    // A peer that never terminates a frame must not grow this buffer forever.
+    if (Buffer.byteLength(this.buffer, "utf8") > maximumFrameBytes) {
+      this.rejectOversizedFrame();
+    }
+  }
+
+  private rejectOversizedFrame(): void {
+    this.buffer = "";
+    this.reject(
+      new SiriusMsgMalformedFrameError("frame exceeds the protocol limit"),
+    );
+    this.socket?.destroy();
   }
 
   private reject(error: Error): void {

@@ -17,14 +17,56 @@ export type SiriusMsgAdapterMode = "direct" | "durable";
  * via the `definition` "SiriusMsgAdapterRunState".
  */
 export type SiriusMsgAdapterRunState =
-  | "backingOff"
-  | "blocked"
-  | "connecting"
-  | "failed"
-  | "idle"
-  | "processing"
-  | "stopped"
-  | "subscribed";
+  "backingOff" | "blocked" | "connecting" | "failed" | "idle" | "processing" | "stopped" | "subscribed";
+/**
+ * Public message identifier.
+ *
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgMessageID".
+ */
+export type SiriusMsgMessageID = string;
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAgentID".
+ */
+export type SiriusMsgAgentID = "claude" | "codex" | "deepseek" | "hermes" | "openclaw" | "opencode" | "pi" | "sirius";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAgentControlCommand".
+ */
+export type SiriusMsgAgentControlCommand =
+  | "beginSleepWakeCheckpoint"
+  | "beginValidationRun"
+  | "clearAdapterReview"
+  | "completeSleepWakeCheckpoint"
+  | "createConnection"
+  | "diagnoseOutboundAttachmentRows"
+  | "enableAndExportVMAccess"
+  | "finishValidationRun"
+  | "listAllowlistCandidates"
+  | "listChats"
+  | "probeAccessibility"
+  | "probeAutomation"
+  | "probeFullDiskAccess"
+  | "probeVMAccess"
+  | "readActivity"
+  | "readConfiguration"
+  | "reloadRecipes"
+  | "removeConnection"
+  | "runCapabilityHonestySmoke"
+  | "runMessagesRestartCheckpoint"
+  | "runServiceRestartCheckpoint"
+  | "runSubscriberReconnectCheckpoint"
+  | "savePythonAdapterConfiguration"
+  | "sendAutomationSmoke"
+  | "sendOutboundFileSmoke"
+  | "sendRichLinkSmoke"
+  | "setActivityRetention"
+  | "setRichMessagingConfiguration"
+  | "setVMAccessEnabled"
+  | "shutdown"
+  | "status"
+  | "updateConnection";
 /**
  * Public chat identifier.
  *
@@ -33,40 +75,20 @@ export type SiriusMsgAdapterRunState =
  */
 export type SiriusMsgChatID = string;
 /**
- * Public handle identifier.
- *
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgHandleID".
+ * via the `definition` "SiriusMsgChatKindFilter".
  */
-export type SiriusMsgHandleID = string;
+export type SiriusMsgChatKindFilter = "all" | "direct" | "group";
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgAttachmentDiagnosticCode".
+ * via the `definition` "SiriusMsgChatSort".
  */
-export type SiriusMsgAttachmentDiagnosticCode =
-  | "attachmentCapableSubscriberRequired"
-  | "failedTranscode"
-  | "sourceOutsideMessagesAttachments"
-  | "tooLarge"
-  | "unreadable"
-  | "unsupportedType";
-/**
- * Public attachment identifier.
- *
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgAttachmentID".
- */
-export type SiriusMsgAttachmentID = string;
+export type SiriusMsgChatSort = "lastActivity" | "name" | "people" | "service";
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgAttachmentKind".
+ * via the `definition` "SiriusMsgTranscriptScope".
  */
-export type SiriusMsgAttachmentKind = "document" | "image";
-/**
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgAttachmentState".
- */
-export type SiriusMsgAttachmentState = "failed" | "materialized" | "tooLarge" | "unreadable" | "unsupportedType";
+export type SiriusMsgTranscriptScope = "connection" | "conversation";
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
  * via the `definition` "SiriusMsgFeature".
@@ -91,6 +113,23 @@ export type SiriusMsgFeature =
   | "sendUnsend";
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgRichMessagingProvider".
+ */
+export type SiriusMsgRichMessagingProvider = "imsg" | "nativeAccessibility";
+/**
+ * Public handle identifier.
+ *
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgHandleID".
+ */
+export type SiriusMsgHandleID = string;
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgTransport".
+ */
+export type SiriusMsgTransport = "localMessagesAutomation" | "managedRelay" | "messagesForBusiness";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
  * via the `definition` "SiriusMsgCapabilityProof".
  */
 export type SiriusMsgCapabilityProof =
@@ -106,60 +145,7 @@ export type SiriusMsgCapabilityProof =
  * via the `definition` "SiriusMsgCapabilitySupport".
  */
 export type SiriusMsgCapabilitySupport =
-  | "blocked"
-  | "degraded"
-  | "providerOnly"
-  | "receiveOnly"
-  | "researchGated"
-  | "supported"
-  | "unsupported";
-/**
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgTransport".
- */
-export type SiriusMsgTransport = "localMessagesAutomation" | "managedRelay" | "messagesForBusiness";
-/**
- * Public message identifier.
- *
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgMessageID".
- */
-export type SiriusMsgMessageID = string;
-/**
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgContentKind".
- */
-export type SiriusMsgContentKind =
-  | "attachment"
-  | "edit"
-  | "messageEffect"
-  | "reaction"
-  | "reply"
-  | "richLink"
-  | "text"
-  | "typing"
-  | "unsend"
-  | "unsupported";
-/**
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgReactionAction".
- */
-export type SiriusMsgReactionAction = "added" | "removed";
-/**
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgReaction".
- */
-export type SiriusMsgReaction = "dislike" | "emphasize" | "laugh" | "like" | "love" | "question";
-/**
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgRichLinkKind".
- */
-export type SiriusMsgRichLinkKind = "generatedPreview" | "plain";
-/**
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgTypingState".
- */
-export type SiriusMsgTypingState = "started" | "stopped";
+  "blocked" | "degraded" | "providerOnly" | "receiveOnly" | "researchGated" | "supported" | "unsupported";
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
  * via the `definition` "SiriusMsgVMReachabilityState".
@@ -198,6 +184,111 @@ export type SiriusMsgRecipeTrigger = "edit" | "inboundMessage" | "reaction" | "s
 export type SiriusMsgHealthState = "blocked" | "degraded" | "healthy" | "starting" | "stopped";
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgRuntimeFileKind".
+ */
+export type SiriusMsgRuntimeFileKind = "directory" | "missing" | "other" | "regularFile" | "socket" | "symlink";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgCodeSigningValidationState".
+ */
+export type SiriusMsgCodeSigningValidationState =
+  "adHoc" | "invalid" | "unavailable" | "unsigned" | "valid" | "wrongAuthority" | "wrongIdentifier" | "wrongTeam";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgSendConfirmationState".
+ */
+export type SiriusMsgSendConfirmationState = "confirmed" | "dispatched" | "notRequested" | "unconfirmed";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgContentKind".
+ */
+export type SiriusMsgContentKind =
+  | "attachment"
+  | "edit"
+  | "messageEffect"
+  | "reaction"
+  | "reply"
+  | "richLink"
+  | "text"
+  | "typing"
+  | "unsend"
+  | "unsupported";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgValidationStep".
+ */
+export type SiriusMsgValidationStep =
+  | "automationProbe"
+  | "automationSendSmoke"
+  | "capabilityHonesty"
+  | "fullDiskAccessProbe"
+  | "messagesRestart"
+  | "outboundAttachmentRows"
+  | "outboundFileSendSmoke"
+  | "privacySentinel"
+  | "richLinkSmoke"
+  | "runtimeFiles"
+  | "serviceRestart"
+  | "signedIdentity"
+  | "sleepWake"
+  | "subscriberReconnect"
+  | "vmExport"
+  | "vmProbe";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgValidationResultState".
+ */
+export type SiriusMsgValidationResultState = "failed" | "passed" | "skipped";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAttachmentDiagnosticCode".
+ */
+export type SiriusMsgAttachmentDiagnosticCode =
+  | "attachmentCapableSubscriberRequired"
+  | "failedTranscode"
+  | "sourceOutsideMessagesAttachments"
+  | "tooLarge"
+  | "unreadable"
+  | "unsupportedType";
+/**
+ * Public attachment identifier.
+ *
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAttachmentID".
+ */
+export type SiriusMsgAttachmentID = string;
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAttachmentKind".
+ */
+export type SiriusMsgAttachmentKind = "document" | "image";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAttachmentState".
+ */
+export type SiriusMsgAttachmentState = "failed" | "materialized" | "tooLarge" | "unreadable" | "unsupportedType";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgReactionAction".
+ */
+export type SiriusMsgReactionAction = "added" | "removed";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgReaction".
+ */
+export type SiriusMsgReaction = "dislike" | "emphasize" | "laugh" | "like" | "love" | "question";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgRichLinkKind".
+ */
+export type SiriusMsgRichLinkKind = "generatedPreview" | "plain";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgTypingState".
+ */
+export type SiriusMsgTypingState = "started" | "stopped";
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
  * via the `definition` "SiriusMsgInboundEventKind".
  */
 export type SiriusMsgInboundEventKind = "message" | "messageEdited" | "messageUnsent" | "reaction" | "replyReference";
@@ -206,15 +297,7 @@ export type SiriusMsgInboundEventKind = "message" | "messageEdited" | "messageUn
  * via the `definition` "SiriusMsgRecipeIntegrationKind".
  */
 export type SiriusMsgRecipeIntegrationKind =
-  | "calendar"
-  | "github"
-  | "gmail"
-  | "linear"
-  | "mcp"
-  | "notion"
-  | "outlook"
-  | "reminders"
-  | "webhook";
+  "calendar" | "github" | "gmail" | "linear" | "mcp" | "notion" | "outlook" | "reminders" | "webhook";
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
  * via the `definition` "SiriusMsgRecipeTriggerSource".
@@ -225,11 +308,6 @@ export type SiriusMsgRecipeTriggerSource = "inbound" | "schedule" | "webhook";
  * via the `definition` "SiriusMsgReconnectPolicy".
  */
 export type SiriusMsgReconnectPolicy = "default" | "none";
-/**
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgSendConfirmationState".
- */
-export type SiriusMsgSendConfirmationState = "confirmed" | "dispatched" | "notRequested" | "unconfirmed";
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
  * via the `definition` "SiriusMsgServiceErrorCode".
@@ -246,11 +324,14 @@ export type SiriusMsgServiceErrorCode =
   | "authFailed"
   | "authRequired"
   | "backpressure"
+  | "historyUnavailable"
   | "internalError"
   | "invalidRequest"
   | "malformedFrame"
   | "peerCredentialsRejected"
   | "protocolVersionUnsupported"
+  | "sendOperationConflict"
+  | "sendOperationUnresolved"
   | "sendRejected"
   | "subscriptionAlreadyActive"
   | "tokenRotationFailed"
@@ -260,12 +341,7 @@ export type SiriusMsgServiceErrorCode =
  * via the `definition` "SiriusMsgServiceEventKind".
  */
 export type SiriusMsgServiceEventKind =
-  | "health"
-  | "message"
-  | "messageEdited"
-  | "messageUnsent"
-  | "reaction"
-  | "replyReference";
+  "health" | "message" | "messageEdited" | "messageUnsent" | "reaction" | "replyReference";
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
  * via the `definition` "SiriusMsgServiceRequestKind".
@@ -276,7 +352,10 @@ export type SiriusMsgServiceRequestKind =
   | "capabilities"
   | "fetchAttachment"
   | "health"
+  | "listAllowedChats"
+  | "readHistory"
   | "rotateAuthToken"
+  | "searchHistory"
   | "send"
   | "subscribe"
   | "updateAllowlist";
@@ -286,6 +365,7 @@ export type SiriusMsgServiceRequestKind =
  */
 export type SiriusMsgServiceResponseKind =
   | "acked"
+  | "allowedChats"
   | "allowlistUpdated"
   | "attachmentFile"
   | "authTokenRotated"
@@ -294,6 +374,7 @@ export type SiriusMsgServiceResponseKind =
   | "error"
   | "event"
   | "health"
+  | "historyPage"
   | "sendResult"
   | "subscribed";
 /**
@@ -307,6 +388,55 @@ export type SiriusMsgTransportTrustPosture = "appleBusinessProvider" | "localMac
  */
 export interface SiriusMsgProtocolV1 {
   [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAccessibilityPermission".
+ */
+export interface SiriusMsgAccessibilityPermission {
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  checkedAt: number;
+  isTrusted: boolean;
+  process: SiriusMsgProcessIdentity;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgProcessIdentity".
+ */
+export interface SiriusMsgProcessIdentity {
+  bundleIdentifier?: string;
+  effectiveUserID: number;
+  executablePath: string;
+  processIdentifier: number;
+  userID: number;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgActivityRecord".
+ */
+export interface SiriusMsgActivityRecord {
+  chatReference?: string;
+  connectionID?: string;
+  id: string;
+  needsAttention: boolean;
+  result: string;
+  symbol: string;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  timestamp: number;
+  title: string;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAdapterMaintenanceResult".
+ */
+export interface SiriusMsgAdapterMaintenanceResult {
+  adapterID: SiriusMsgAdapterID;
+  clearedBlockedReviewJobs: number;
+  queueMetrics: SiriusMsgAdapterQueueMetrics;
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
@@ -324,11 +454,501 @@ export interface SiriusMsgAdapterQueueMetrics {
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAdapterStatus".
+ */
+export interface SiriusMsgAdapterStatus {
+  activeMessageID?: SiriusMsgMessageID;
+  adapterID: SiriusMsgAdapterID;
+  connectionID?: string;
+  diagnostic: string;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  lastSuccessfulTurnAt?: number;
+  mode: SiriusMsgAdapterMode;
+  queueMetrics: SiriusMsgAdapterQueueMetrics;
+  runState: SiriusMsgAdapterRunState;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  updatedAt: number;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAgentConnection".
+ */
+export interface SiriusMsgAgentConnection {
+  agentID: SiriusMsgAgentID;
+  agentName?: string;
+  executableURL: string;
+  projectDirectory: string;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAgentControlRequest".
+ */
+export interface SiriusMsgAgentControlRequest {
+  accountID?: string;
+  activityRetentionDays?: number;
+  adapterID?: SiriusMsgAdapterID;
+  appProcess?: SiriusMsgProcessIdentity;
+  attachmentFileURL?: string;
+  chatID?: SiriusMsgChatID;
+  chatListQuery?: SiriusMsgChatListQuery;
+  command: SiriusMsgAgentControlCommand;
+  connectionID?: string;
+  connectionProfile?: SiriusMsgConnectionProfile;
+  exportURL?: string;
+  messageText?: string;
+  privacySentinel?: string;
+  pythonAdapterConfiguration?: SiriusMsgPythonAdapterConfiguration;
+  richLinkCardsBaseURL?: string;
+  richLinkImageURL?: string;
+  richLinkTitle?: string;
+  richLinkURL?: string;
+  richMessagingConfiguration?: SiriusMsgRichMessagingConfiguration;
+  validationRunID?: string;
+  vmAccessEnabled?: boolean;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgChatListQuery".
+ */
+export interface SiriusMsgChatListQuery {
+  ascending: boolean;
+  cursor?: SiriusMsgChatPageCursor;
+  kind: SiriusMsgChatKindFilter;
+  limit: number;
+  searchText?: string;
+  sort: SiriusMsgChatSort;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgChatPageCursor".
+ */
+export interface SiriusMsgChatPageCursor {
+  chatRowID: number;
+  sortValue: string;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgConnectionProfile".
+ */
+export interface SiriusMsgConnectionProfile {
+  agent?: SiriusMsgAgentConnection;
+  clientID?: SiriusMsgAgentID;
+  clientKind?: string;
+  codex?: SiriusMsgCodexConnection;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  createdAt: number;
+  displayName: string;
+  enabled: boolean;
+  excludedChatIDs: SiriusMsgChatID[];
+  id: string;
+  includedChatIDs?: SiriusMsgChatID[];
+  incomingAllowed: boolean;
+  repliesAllowed: boolean;
+  setupConfigurationBackupURL?: string;
+  setupConfigurationURL?: string;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgCodexConnection".
+ */
+export interface SiriusMsgCodexConnection {
+  executableURL: string;
+  managedServerDirectory?: string;
+  projectDirectory?: string;
+  socketURL: string;
+  threadID: string;
+  transcriptScope?: SiriusMsgTranscriptScope;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgPythonAdapterConfiguration".
+ */
+export interface SiriusMsgPythonAdapterConfiguration {
+  adapterID: SiriusMsgAdapterID;
+  enabled: boolean;
+  handlerFunction: string;
+  handlerModule: string;
+  includeMessageBody: boolean;
+  pythonPackagePath: string;
+  supportsAttachments: boolean;
+  timeoutSeconds: number;
+  workerCount: number;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgRichMessagingConfiguration".
+ */
+export interface SiriusMsgRichMessagingConfiguration {
+  allowedFeatures?: SiriusMsgFeature[];
+  enabled: boolean;
+  executablePath: string;
+  nativeEnabled?: boolean;
+  provider: SiriusMsgRichMessagingProvider;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAgentControlResponse".
+ */
+export interface SiriusMsgAgentControlResponse {
+  accepted: boolean;
+  accessibilityPermission?: SiriusMsgAccessibilityPermission;
+  activityRecords?: SiriusMsgActivityRecord[];
+  adapterMaintenanceResult?: SiriusMsgAdapterMaintenanceResult;
+  adapterStatuses?: SiriusMsgAdapterStatus[];
+  allowlistCandidates: SiriusMsgAllowlistCandidate[];
+  chatListPage?: SiriusMsgChatListPage;
+  configuration?: SiriusMsgLocalConfigurationSnapshot;
+  connectionProfile?: SiriusMsgConnectionProfile;
+  error?: string;
+  health?: SiriusMsgHealth;
+  restartRequired?: boolean;
+  status?: SiriusMsgAgentRuntimeStatus;
+  validationResult?: SiriusMsgValidationResult;
+  validationRun?: SiriusMsgValidationRun;
+  validationRuns?: SiriusMsgValidationRun[];
+  vmGuestConfiguration?: SiriusMsgVMGuestConfiguration;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAllowlistCandidate".
+ */
+export interface SiriusMsgAllowlistCandidate {
+  chatID: SiriusMsgChatID;
+  displayName?: string;
+  identifier?: string;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  lastActivityAt?: number;
+  /**
+   * Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.
+   */
+  lastRowID?: number;
+  participantCount: number;
+  serviceName?: string;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgChatListPage".
+ */
+export interface SiriusMsgChatListPage {
+  chats: SiriusMsgAllowlistCandidate[];
+  nextCursor?: SiriusMsgChatPageCursor;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgLocalConfigurationSnapshot".
+ */
+export interface SiriusMsgLocalConfigurationSnapshot {
+  activityRetentionDays: number;
+  allowlist: SiriusMsgAllowlist;
+  connections: SiriusMsgConnectionProfile[];
+  pythonAdapters: SiriusMsgPythonAdapterConfiguration[];
+  richMessaging?: SiriusMsgRichMessagingConfiguration;
+  vmAccessEnabled: boolean;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
  * via the `definition` "SiriusMsgAllowlist".
  */
 export interface SiriusMsgAllowlist {
   chatIDs: SiriusMsgChatID[];
   handleIDs: SiriusMsgHandleID[];
+  replyDeniedChatIDs?: SiriusMsgChatID[];
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgHealth".
+ */
+export interface SiriusMsgHealth {
+  activeTransport: SiriusMsgTransport;
+  capabilities: SiriusMsgCapability[];
+  components: SiriusMsgHealthComponent[];
+  reason: string;
+  recipeRuntime?: SiriusMsgRecipeRuntimeStatus;
+  state: SiriusMsgHealthState;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgCapability".
+ */
+export interface SiriusMsgCapability {
+  diagnosticCode?: string;
+  evidenceNote: string;
+  evidenceURL?: string;
+  feature: SiriusMsgFeature;
+  proof: SiriusMsgCapabilityProof;
+  support: SiriusMsgCapabilitySupport;
+  transport: SiriusMsgTransport;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgHealthComponent".
+ */
+export interface SiriusMsgHealthComponent {
+  detail?: SiriusMsgHealthComponentDetail;
+  kind: SiriusMsgHealthComponentKind;
+  reason: string;
+  state: SiriusMsgHealthComponentState;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgHealthComponentDetail".
+ */
+export interface SiriusMsgHealthComponentDetail {
+  adapterID?: SiriusMsgAdapterID;
+  adapterMode?: SiriusMsgAdapterMode;
+  adapterQueueMetrics?: SiriusMsgAdapterQueueMetrics;
+  adapterRunState?: SiriusMsgAdapterRunState;
+  endpoint?: string;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  lastVMReachabilityProbeAt?: number;
+  peerCredentialPolicy?: string;
+  peerCredentialsEnforced?: boolean;
+  port?: number;
+  richMessagingFeatures?: string[];
+  richMessagingRemediation?: string;
+  richMessagingState?: string;
+  tokenAgeDays?: number;
+  tokenAuthenticationAvailable?: boolean;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  tokenCreatedAt?: number;
+  tokenMaintenanceDue?: boolean;
+  tokenRemediation?: string;
+  tokenStaleAfterDays?: number;
+  vmReachability?: SiriusMsgVMReachabilityState;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgRecipeRuntimeStatus".
+ */
+export interface SiriusMsgRecipeRuntimeStatus {
+  actionlessEnabledRecipeCount: number;
+  deferredTriggerRecipeCount: number;
+  diagnosticCounts: {
+    [k: string]: number;
+  };
+  enabledRecipeCount: number;
+  evaluatedCount: number;
+  failedCount: number;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  lastEventAt?: number;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  lastReloadAt?: number;
+  lastReloadDiagnostic?: string;
+  liveTriggers: SiriusMsgRecipeTrigger[];
+  loadedRecipeCount: number;
+  runningRecipeCount: number;
+  sentCount: number;
+  skippedCount: number;
+  triggerCounts: {
+    [k: string]: SiriusMsgRecipeTriggerRuntimeCounts;
+  };
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgRecipeTriggerRuntimeCounts".
+ */
+export interface SiriusMsgRecipeTriggerRuntimeCounts {
+  diagnosticCounts: {
+    [k: string]: number;
+  };
+  evaluatedCount: number;
+  failedCount: number;
+  sentCount: number;
+  skippedCount: number;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAgentRuntimeStatus".
+ */
+export interface SiriusMsgAgentRuntimeStatus {
+  controlSocketPath: string;
+  lastHealth: SiriusMsgHealth;
+  process: SiriusMsgProcessIdentity;
+  runtimeFiles: SiriusMsgRuntimeFileIdentity[];
+  serviceSocketPath: string;
+  signing: SiriusMsgCodeSigningIdentity;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  startedAt: number;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  updatedAt: number;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgRuntimeFileIdentity".
+ */
+export interface SiriusMsgRuntimeFileIdentity {
+  kind: SiriusMsgRuntimeFileKind;
+  mode?: number;
+  ownerUserID?: number;
+  path: string;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgCodeSigningIdentity".
+ */
+export interface SiriusMsgCodeSigningIdentity {
+  authorities: string[];
+  diagnostic: string;
+  signingIdentifier?: string;
+  teamIdentifier?: string;
+  validationState: SiriusMsgCodeSigningValidationState;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgValidationResult".
+ */
+export interface SiriusMsgValidationResult {
+  bundleIdentifier?: string;
+  deliverableEventCapture?: SiriusMsgDeliverableEventCapture;
+  diagnostic: string;
+  messagingEvidence?: SiriusMsgMessagingValidationEvidence;
+  process: SiriusMsgProcessIdentity;
+  recoveryEvidence?: SiriusMsgRecoveryValidationEvidence;
+  signing: SiriusMsgCodeSigningIdentity;
+  state: SiriusMsgValidationResultState;
+  step: SiriusMsgValidationStep;
+  teamIdentifier?: string;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  timestamp: number;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgDeliverableEventCapture".
+ */
+export interface SiriusMsgDeliverableEventCapture {
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  capturedAt: number;
+  chatID: SiriusMsgChatID;
+  containsMessageBody: boolean;
+  messageID: SiriusMsgMessageID;
+  messageText?: string;
+  rowID: number;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgMessagingValidationEvidence".
+ */
+export interface SiriusMsgMessagingValidationEvidence {
+  attachmentByteCount?: number;
+  attachmentMIMEType?: string;
+  attachmentSHA256?: string;
+  capabilityDiagnostics: string[];
+  confirmationState?: SiriusMsgSendConfirmationState;
+  contentKind: SiriusMsgContentKind;
+  diagnostics: string[];
+  generatedPreviewRequested: boolean;
+  platformMessageID?: string;
+  providerTransportsQueried: SiriusMsgTransport[];
+  resolvedRichLinkURL?: string;
+  richLinkURL?: string;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgRecoveryValidationEvidence".
+ */
+export interface SiriusMsgRecoveryValidationEvidence {
+  ackedEventSuppressed: boolean;
+  ackOwnershipEnforced: boolean;
+  afterHealthState?: SiriusMsgHealthState;
+  afterProcessIdentifier?: number;
+  automationRecovered: boolean;
+  beforeHealthState?: SiriusMsgHealthState;
+  beforeProcessIdentifier?: number;
+  checkpoint: SiriusMsgValidationStep;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  completedAt: number;
+  cursorAdvancedOnlyAfterAck: boolean;
+  diagnostics: string[];
+  duplicateAckRejected: boolean;
+  fullDiskAccessRecovered: boolean;
+  messageIDs: SiriusMsgMessageID[];
+  messagesApplicationRunning: boolean;
+  rowIDs: number[];
+  socketAuthenticated: boolean;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  startedAt: number;
+  statusHeartbeatRecovered: boolean;
+  tokenReadable: boolean;
+  tokenReused: boolean;
+  unackedEventRedelivered: boolean;
+  vmProbeRecovered: boolean;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgValidationRun".
+ */
+export interface SiriusMsgValidationRun {
+  agentProcess?: SiriusMsgProcessIdentity;
+  appProcess?: SiriusMsgProcessIdentity;
+  appSigning?: SiriusMsgCodeSigningIdentity;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  completedAt?: number;
+  id: string;
+  privacySentinel?: string;
+  results: SiriusMsgValidationResult[];
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  startedAt: number;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgVMGuestConfiguration".
+ */
+export interface SiriusMsgVMGuestConfiguration {
+  authToken: string;
+  endpointHost: string;
+  endpointPort: number;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  generatedAt: number;
+  generatingBundleIdentifier?: string;
+  generatingTeamIdentifier?: string;
+  protocolVersion: number;
+  /**
+   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   */
+  tokenCreatedAt: number;
+  tokenStaleAfterDays: number;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgAllowedChatQuery".
+ */
+export interface SiriusMsgAllowedChatQuery {
+  limit: number;
+  searchText?: string;
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
@@ -380,19 +1000,7 @@ export interface SiriusMsgAuthTokenRotationResult {
   rotatedAt: number;
   staleAfterDays: number;
   token: string;
-}
-/**
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgCapability".
- */
-export interface SiriusMsgCapability {
-  diagnosticCode?: string;
-  evidenceNote: string;
-  evidenceURL?: string;
-  feature: SiriusMsgFeature;
-  proof: SiriusMsgCapabilityProof;
-  support: SiriusMsgCapabilitySupport;
-  transport: SiriusMsgTransport;
+  vmExportsRefreshed?: boolean;
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
@@ -502,94 +1110,67 @@ export interface SiriusMsgCursorState {
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgHealth".
+ * via the `definition` "SiriusMsgHistoryMessage".
  */
-export interface SiriusMsgHealth {
-  activeTransport: SiriusMsgTransport;
-  capabilities: SiriusMsgCapability[];
-  components: SiriusMsgHealthComponent[];
-  reason: string;
-  recipeRuntime?: SiriusMsgRecipeRuntimeStatus;
-  state: SiriusMsgHealthState;
-}
-/**
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgHealthComponent".
- */
-export interface SiriusMsgHealthComponent {
-  detail?: SiriusMsgHealthComponentDetail;
-  kind: SiriusMsgHealthComponentKind;
-  reason: string;
-  state: SiriusMsgHealthComponentState;
-}
-/**
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgHealthComponentDetail".
- */
-export interface SiriusMsgHealthComponentDetail {
-  adapterID?: SiriusMsgAdapterID;
-  adapterMode?: SiriusMsgAdapterMode;
-  adapterQueueMetrics?: SiriusMsgAdapterQueueMetrics;
-  adapterRunState?: SiriusMsgAdapterRunState;
-  endpoint?: string;
+export interface SiriusMsgHistoryMessage {
+  attachmentCount: number;
+  authorDisplayName: string;
+  chatID: SiriusMsgChatID;
+  handleID?: SiriusMsgHandleID;
+  id: SiriusMsgMessageID;
+  isFromMe: boolean;
+  isGroupChat: boolean;
+  replyToMessageID?: SiriusMsgMessageID;
+  /**
+   * Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.
+   */
+  rowID: number;
   /**
    * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
    */
-  lastVMReachabilityProbeAt?: number;
-  peerCredentialPolicy?: string;
-  peerCredentialsEnforced?: boolean;
-  port?: number;
-  tokenAgeDays?: number;
-  /**
-   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
-   */
-  tokenCreatedAt?: number;
-  tokenStaleAfterDays?: number;
-  vmReachability?: SiriusMsgVMReachabilityState;
+  sentAt: number;
+  text: string;
+  textTruncated?: boolean;
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgRecipeRuntimeStatus".
+ * via the `definition` "SiriusMsgHistoryPage".
  */
-export interface SiriusMsgRecipeRuntimeStatus {
-  actionlessEnabledRecipeCount: number;
-  deferredTriggerRecipeCount: number;
-  diagnosticCounts: {
-    [k: string]: number;
-  };
-  enabledRecipeCount: number;
-  evaluatedCount: number;
-  failedCount: number;
+export interface SiriusMsgHistoryPage {
+  messages: SiriusMsgHistoryMessage[];
   /**
-   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
+   * Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.
    */
-  lastEventAt?: number;
-  /**
-   * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
-   */
-  lastReloadAt?: number;
-  lastReloadDiagnostic?: string;
-  liveTriggers: SiriusMsgRecipeTrigger[];
-  loadedRecipeCount: number;
-  runningRecipeCount: number;
-  sentCount: number;
-  skippedCount: number;
-  triggerCounts: {
-    [k: string]: SiriusMsgRecipeTriggerRuntimeCounts;
-  };
+  nextBeforeRowID?: number;
+  scannedRowCount: number;
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgRecipeTriggerRuntimeCounts".
+ * via the `definition` "SiriusMsgHistoryReadRequest".
  */
-export interface SiriusMsgRecipeTriggerRuntimeCounts {
-  diagnosticCounts: {
-    [k: string]: number;
-  };
-  evaluatedCount: number;
-  failedCount: number;
-  sentCount: number;
-  skippedCount: number;
+export interface SiriusMsgHistoryReadRequest {
+  /**
+   * Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.
+   */
+  beforeRowID?: number;
+  chatID: SiriusMsgChatID;
+  limit: number;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgHistorySearchRequest".
+ */
+export interface SiriusMsgHistorySearchRequest {
+  /**
+   * Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.
+   */
+  beforeRowID?: number;
+  /**
+   * @maxItems 20
+   */
+  chatIDs?: SiriusMsgChatID[];
+  limit: number;
+  query: string;
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
@@ -784,6 +1365,7 @@ export interface SiriusMsgSendRequest {
   accountID?: string;
   chatID: SiriusMsgChatID;
   content?: SiriusMsgContent;
+  operationID?: string;
   text: string;
 }
 /**
@@ -848,9 +1430,12 @@ export interface SiriusMsgServiceEvent {
  */
 export interface SiriusMsgServiceRequest {
   ack?: SiriusMsgServiceAck;
+  allowedChatQuery?: SiriusMsgAllowedChatQuery;
   allowlist?: SiriusMsgAllowlist;
   attachmentFetch?: SiriusMsgAttachmentFetchRequest;
   authToken?: string;
+  historyRead?: SiriusMsgHistoryReadRequest;
+  historySearch?: SiriusMsgHistorySearchRequest;
   kind: SiriusMsgServiceRequestKind;
   /**
    * SiriusMsg protocol version.
@@ -873,12 +1458,14 @@ export interface SiriusMsgSubscriptionOptions {
  * via the `definition` "SiriusMsgServiceResponse".
  */
 export interface SiriusMsgServiceResponse {
+  allowedChats?: SiriusMsgAllowlistCandidate[];
   attachmentFile?: SiriusMsgAttachmentFileReference;
   authTokenRotationResult?: SiriusMsgAuthTokenRotationResult;
   capabilities?: SiriusMsgCapability[];
   error?: SiriusMsgServiceError;
   event?: SiriusMsgServiceEvent;
   health?: SiriusMsgHealth;
+  historyPage?: SiriusMsgHistoryPage;
   kind: SiriusMsgServiceResponseKind;
   /**
    * SiriusMsg protocol version.

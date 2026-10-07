@@ -3,3 +3,4 @@ export * from "./client.js";
 export * from "./errors.js";
 export * from "./transport.js";
 export * from "./validate.js";
+export * from "./control.js";

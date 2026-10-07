@@ -8,10 +8,17 @@ const addFormats = addFormatsModule as unknown as (ajv: Ajv2020) => void;
 addFormats(ajv);
 ajv.addSchema(schema);
 
-const requestValidator = ajv.getSchema(`${schema.$id}#/$defs/SiriusMsgServiceRequest`);
-const responseValidator = ajv.getSchema(`${schema.$id}#/$defs/SiriusMsgServiceResponse`);
+const requestValidator = ajv.getSchema(
+  `${schema.$id}#/$defs/SiriusMsgServiceRequest`,
+);
+const responseValidator = ajv.getSchema(
+  `${schema.$id}#/$defs/SiriusMsgServiceResponse`,
+);
 
-export function validateDefinition(definitionName: string, value: unknown): void {
+export function validateDefinition(
+  definitionName: string,
+  value: unknown,
+): void {
   const validator = ajv.getSchema(`${schema.$id}#/$defs/${definitionName}`);
   if (!validator?.(value)) {
     throw new SiriusMsgMalformedFrameError(ajv.errorsText(validator?.errors));
@@ -21,14 +28,18 @@ export function validateDefinition(definitionName: string, value: unknown): void
 
 export function validateRequest(value: unknown): void {
   if (!requestValidator?.(value)) {
-    throw new SiriusMsgMalformedFrameError(ajv.errorsText(requestValidator?.errors));
+    throw new SiriusMsgMalformedFrameError(
+      ajv.errorsText(requestValidator?.errors),
+    );
   }
   assertSafeRowIDs(value);
 }
 
 export function validateResponse(value: unknown): void {
   if (!responseValidator?.(value)) {
-    throw new SiriusMsgMalformedFrameError(ajv.errorsText(responseValidator?.errors));
+    throw new SiriusMsgMalformedFrameError(
+      ajv.errorsText(responseValidator?.errors),
+    );
   }
   assertSafeRowIDs(value);
 }
@@ -44,8 +55,20 @@ export function assertSafeRowIDs(value: unknown): void {
     return;
   }
   for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
-    if (key === "rowID" && typeof child === "number" && !Number.isSafeInteger(child)) {
-      throw new SiriusMsgMalformedFrameError(`rowID exceeds Number.MAX_SAFE_INTEGER: ${child}`);
+    if (
+      [
+        "rowID",
+        "chatRowID",
+        "lastRowID",
+        "beforeRowID",
+        "nextBeforeRowID",
+      ].includes(key) &&
+      typeof child === "number" &&
+      !Number.isSafeInteger(child)
+    ) {
+      throw new SiriusMsgMalformedFrameError(
+        `rowID exceeds Number.MAX_SAFE_INTEGER: ${child}`,
+      );
     }
     assertSafeRowIDs(child);
   }

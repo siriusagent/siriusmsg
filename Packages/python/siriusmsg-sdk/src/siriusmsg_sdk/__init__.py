@@ -12,10 +12,18 @@ from siriusmsg_sdk.client import (
     text_content,
     unsend_content,
 )
+from siriusmsg_sdk.control import (
+    SiriusMsgAgentControlClient,
+    SiriusMsgAgentControlError,
+    SiriusMsgControlOutcomeUnknownError,
+)
 from siriusmsg_sdk.errors import *  # noqa: F403
 
 __all__ = [
     "SiriusMsgClient",
+    "SiriusMsgAgentControlClient",
+    "SiriusMsgAgentControlError",
+    "SiriusMsgControlOutcomeUnknownError",
     "attachment_content",
     "edit_content",
     "message_effect_content",

@@ -20,6 +20,10 @@ DEFAULT_RUNTIME_DIR = Path.home() / "Library" / "Application Support" / "SiriusM
 DEFAULT_SOCKET_PATH = DEFAULT_RUNTIME_DIR / "siriusmsg.sock"
 DEFAULT_TOKEN_PATH = DEFAULT_RUNTIME_DIR / "service-token.json"
 PROTOCOL_VERSION = 1
+# The service and the Swift client both cap one NDJSON frame at 1 MiB. A history
+# page can carry a quarter of that in text alone, so the reader must not fall
+# back to asyncio's 64 KiB default limit.
+MAXIMUM_FRAME_BYTES = 1_048_576
 
 
 @dataclass(frozen=True)
@@ -93,9 +97,13 @@ class NDJSONConnection:
     async def open(self) -> None:
         try:
             if self.endpoint.socket_path is not None:
-                self.reader, self.writer = await asyncio.open_unix_connection(str(self.endpoint.socket_path))
+                self.reader, self.writer = await asyncio.open_unix_connection(
+                    str(self.endpoint.socket_path), limit=MAXIMUM_FRAME_BYTES + 1
+                )
             elif self.endpoint.port is not None:
-                self.reader, self.writer = await asyncio.open_connection("127.0.0.1", self.endpoint.port)
+                self.reader, self.writer = await asyncio.open_connection(
+                    "127.0.0.1", self.endpoint.port, limit=MAXIMUM_FRAME_BYTES + 1
+                )
             else:
                 raise SiriusMsgTransportError("endpoint missing socket path or port")
         except OSError as exc:
@@ -131,9 +139,14 @@ class NDJSONConnection:
     async def read_response(self) -> SiriusMsgServiceResponse:
         if self.reader is None:
             raise SiriusMsgTransportError("connection is not open")
-        line = await self.reader.readline()
+        try:
+            line = await self.reader.readline()
+        except (ValueError, asyncio.LimitOverrunError) as exc:
+            raise SiriusMsgMalformedFrameError("frame exceeds the protocol limit") from exc
         if not line:
             raise SiriusMsgTransportError("connection closed")
+        if len(line) > MAXIMUM_FRAME_BYTES + 1:
+            raise SiriusMsgMalformedFrameError("frame exceeds the protocol limit")
         try:
             decoded = json.loads(line)
             return SiriusMsgServiceResponse.model_validate(decoded)

@@ -5,11 +5,49 @@ from __future__ import annotations
 from enum import Enum
 from typing import Literal, Optional
 
-from pydantic import AnyUrl, BaseModel, ConfigDict, Field, RootModel, conint
+from pydantic import AnyUrl, BaseModel, ConfigDict, Field, RootModel, conint, constr
+
+
+class SiriusMsgAccessibilityPermission(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    checkedAt: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    isTrusted: bool
+    process: SiriusMsgProcessIdentity
+
+
+class SiriusMsgActivityRecord(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    chatReference: Optional[str] = None
+    connectionID: Optional[str] = None
+    id: str
+    needsAttention: bool
+    result: str
+    symbol: str
+    timestamp: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    title: str
 
 
 class SiriusMsgAdapterID(RootModel[str]):
     root: str = Field(..., description='Adapter identifier.')
+
+
+class SiriusMsgAdapterMaintenanceResult(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    adapterID: SiriusMsgAdapterID
+    clearedBlockedReviewJobs: int
+    queueMetrics: SiriusMsgAdapterQueueMetrics
 
 
 class SiriusMsgAdapterMode(Enum):
@@ -42,12 +80,187 @@ class SiriusMsgAdapterRunState(Enum):
     subscribed = 'subscribed'
 
 
+class SiriusMsgAdapterStatus(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    activeMessageID: Optional[SiriusMsgMessageID] = None
+    adapterID: SiriusMsgAdapterID
+    connectionID: Optional[str] = None
+    diagnostic: str
+    lastSuccessfulTurnAt: Optional[float] = Field(
+        None,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    mode: SiriusMsgAdapterMode
+    queueMetrics: SiriusMsgAdapterQueueMetrics
+    runState: SiriusMsgAdapterRunState
+    updatedAt: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+
+
+class SiriusMsgAgentConnection(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    agentID: SiriusMsgAgentID
+    agentName: Optional[str] = None
+    executableURL: AnyUrl
+    projectDirectory: AnyUrl
+
+
+class SiriusMsgAgentControlCommand(Enum):
+    beginSleepWakeCheckpoint = 'beginSleepWakeCheckpoint'
+    beginValidationRun = 'beginValidationRun'
+    clearAdapterReview = 'clearAdapterReview'
+    completeSleepWakeCheckpoint = 'completeSleepWakeCheckpoint'
+    createConnection = 'createConnection'
+    diagnoseOutboundAttachmentRows = 'diagnoseOutboundAttachmentRows'
+    enableAndExportVMAccess = 'enableAndExportVMAccess'
+    finishValidationRun = 'finishValidationRun'
+    listAllowlistCandidates = 'listAllowlistCandidates'
+    listChats = 'listChats'
+    probeAccessibility = 'probeAccessibility'
+    probeAutomation = 'probeAutomation'
+    probeFullDiskAccess = 'probeFullDiskAccess'
+    probeVMAccess = 'probeVMAccess'
+    readActivity = 'readActivity'
+    readConfiguration = 'readConfiguration'
+    reloadRecipes = 'reloadRecipes'
+    removeConnection = 'removeConnection'
+    runCapabilityHonestySmoke = 'runCapabilityHonestySmoke'
+    runMessagesRestartCheckpoint = 'runMessagesRestartCheckpoint'
+    runServiceRestartCheckpoint = 'runServiceRestartCheckpoint'
+    runSubscriberReconnectCheckpoint = 'runSubscriberReconnectCheckpoint'
+    savePythonAdapterConfiguration = 'savePythonAdapterConfiguration'
+    sendAutomationSmoke = 'sendAutomationSmoke'
+    sendOutboundFileSmoke = 'sendOutboundFileSmoke'
+    sendRichLinkSmoke = 'sendRichLinkSmoke'
+    setActivityRetention = 'setActivityRetention'
+    setRichMessagingConfiguration = 'setRichMessagingConfiguration'
+    setVMAccessEnabled = 'setVMAccessEnabled'
+    shutdown = 'shutdown'
+    status = 'status'
+    updateConnection = 'updateConnection'
+
+
+class SiriusMsgAgentControlRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    accountID: Optional[str] = None
+    activityRetentionDays: Optional[int] = None
+    adapterID: Optional[SiriusMsgAdapterID] = None
+    appProcess: Optional[SiriusMsgProcessIdentity] = None
+    attachmentFileURL: Optional[AnyUrl] = None
+    chatID: Optional[SiriusMsgChatID] = None
+    chatListQuery: Optional[SiriusMsgChatListQuery] = None
+    command: SiriusMsgAgentControlCommand
+    connectionID: Optional[str] = None
+    connectionProfile: Optional[SiriusMsgConnectionProfile] = None
+    exportURL: Optional[AnyUrl] = None
+    messageText: Optional[str] = None
+    privacySentinel: Optional[str] = None
+    pythonAdapterConfiguration: Optional[SiriusMsgPythonAdapterConfiguration] = None
+    richLinkCardsBaseURL: Optional[AnyUrl] = None
+    richLinkImageURL: Optional[AnyUrl] = None
+    richLinkTitle: Optional[str] = None
+    richLinkURL: Optional[AnyUrl] = None
+    richMessagingConfiguration: Optional[SiriusMsgRichMessagingConfiguration] = None
+    validationRunID: Optional[str] = None
+    vmAccessEnabled: Optional[bool] = None
+
+
+class SiriusMsgAgentControlResponse(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    accepted: bool
+    accessibilityPermission: Optional[SiriusMsgAccessibilityPermission] = None
+    activityRecords: Optional[list[SiriusMsgActivityRecord]] = None
+    adapterMaintenanceResult: Optional[SiriusMsgAdapterMaintenanceResult] = None
+    adapterStatuses: Optional[list[SiriusMsgAdapterStatus]] = None
+    allowlistCandidates: list[SiriusMsgAllowlistCandidate]
+    chatListPage: Optional[SiriusMsgChatListPage] = None
+    configuration: Optional[SiriusMsgLocalConfigurationSnapshot] = None
+    connectionProfile: Optional[SiriusMsgConnectionProfile] = None
+    error: Optional[str] = None
+    health: Optional[SiriusMsgHealth] = None
+    restartRequired: Optional[bool] = None
+    status: Optional[SiriusMsgAgentRuntimeStatus] = None
+    validationResult: Optional[SiriusMsgValidationResult] = None
+    validationRun: Optional[SiriusMsgValidationRun] = None
+    validationRuns: Optional[list[SiriusMsgValidationRun]] = None
+    vmGuestConfiguration: Optional[SiriusMsgVMGuestConfiguration] = None
+
+
+class SiriusMsgAgentID(Enum):
+    claude = 'claude'
+    codex = 'codex'
+    deepseek = 'deepseek'
+    hermes = 'hermes'
+    openclaw = 'openclaw'
+    opencode = 'opencode'
+    pi = 'pi'
+    sirius = 'sirius'
+
+
+class SiriusMsgAgentRuntimeStatus(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    controlSocketPath: str
+    lastHealth: SiriusMsgHealth
+    process: SiriusMsgProcessIdentity
+    runtimeFiles: list[SiriusMsgRuntimeFileIdentity]
+    serviceSocketPath: str
+    signing: SiriusMsgCodeSigningIdentity
+    startedAt: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    updatedAt: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+
+
+class SiriusMsgAllowedChatQuery(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    limit: conint(ge=1, le=100)
+    searchText: Optional[constr(max_length=1024)] = None
+
+
 class SiriusMsgAllowlist(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
     chatIDs: list[SiriusMsgChatID]
     handleIDs: list[SiriusMsgHandleID]
+    replyDeniedChatIDs: Optional[list[SiriusMsgChatID]] = None
+
+
+class SiriusMsgAllowlistCandidate(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    chatID: SiriusMsgChatID
+    displayName: Optional[str] = None
+    identifier: Optional[str] = None
+    lastActivityAt: Optional[float] = Field(
+        None,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    lastRowID: Optional[conint(ge=0, le=9007199254740991)] = Field(
+        None,
+        description='Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.',
+    )
+    participantCount: conint(ge=0)
+    serviceName: Optional[str] = None
 
 
 class SiriusMsgAttachmentDiagnosticCode(Enum):
@@ -125,6 +338,7 @@ class SiriusMsgAuthTokenRotationResult(BaseModel):
     )
     staleAfterDays: int
     token: str
+    vmExportsRefreshed: Optional[bool] = None
 
 
 class SiriusMsgCapability(BaseModel):
@@ -164,6 +378,104 @@ class SiriusMsgChatID(RootModel[str]):
     root: str = Field(..., description='Public chat identifier.')
 
 
+class SiriusMsgChatKindFilter(Enum):
+    all = 'all'
+    direct = 'direct'
+    group = 'group'
+
+
+class SiriusMsgChatListPage(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    chats: list[SiriusMsgAllowlistCandidate]
+    nextCursor: Optional[SiriusMsgChatPageCursor] = None
+
+
+class SiriusMsgChatListQuery(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    ascending: bool
+    cursor: Optional[SiriusMsgChatPageCursor] = None
+    kind: SiriusMsgChatKindFilter
+    limit: int
+    searchText: Optional[str] = None
+    sort: SiriusMsgChatSort
+
+
+class SiriusMsgChatPageCursor(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    chatRowID: int
+    sortValue: str
+
+
+class SiriusMsgChatSort(Enum):
+    lastActivity = 'lastActivity'
+    name = 'name'
+    people = 'people'
+    service = 'service'
+
+
+class SiriusMsgCodeSigningIdentity(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    authorities: list[str]
+    diagnostic: str
+    signingIdentifier: Optional[str] = None
+    teamIdentifier: Optional[str] = None
+    validationState: SiriusMsgCodeSigningValidationState
+
+
+class SiriusMsgCodeSigningValidationState(Enum):
+    adHoc = 'adHoc'
+    invalid = 'invalid'
+    unavailable = 'unavailable'
+    unsigned = 'unsigned'
+    valid = 'valid'
+    wrongAuthority = 'wrongAuthority'
+    wrongIdentifier = 'wrongIdentifier'
+    wrongTeam = 'wrongTeam'
+
+
+class SiriusMsgCodexConnection(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    executableURL: AnyUrl
+    managedServerDirectory: Optional[AnyUrl] = None
+    projectDirectory: Optional[AnyUrl] = None
+    socketURL: AnyUrl
+    threadID: str
+    transcriptScope: Optional[SiriusMsgTranscriptScope] = None
+
+
+class SiriusMsgConnectionProfile(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    agent: Optional[SiriusMsgAgentConnection] = None
+    clientID: Optional[SiriusMsgAgentID] = None
+    clientKind: Optional[str] = None
+    codex: Optional[SiriusMsgCodexConnection] = None
+    createdAt: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    displayName: str
+    enabled: bool
+    excludedChatIDs: list[SiriusMsgChatID]
+    id: str
+    includedChatIDs: Optional[list[SiriusMsgChatID]] = None
+    incomingAllowed: bool
+    repliesAllowed: bool
+    setupConfigurationBackupURL: Optional[AnyUrl] = None
+    setupConfigurationURL: Optional[AnyUrl] = None
+
+
 class SiriusMsgContent(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -175,7 +487,7 @@ class SiriusMsgContent(BaseModel):
     reaction: Optional[SiriusMsgReactionContent] = None
     reply: Optional[SiriusMsgReplyContent] = None
     richLink: Optional[SiriusMsgRichLink] = None
-    text: Optional[str] = None
+    text: Optional[constr(max_length=4096)] = None
     typing: Optional[SiriusMsgTypingState] = None
     unsend: Optional[SiriusMsgUnsendContent] = None
     unsupported: Optional[SiriusMsgUnsupportedContent] = None
@@ -199,6 +511,21 @@ class SiriusMsgCursorState(BaseModel):
         extra='forbid',
     )
     lastRowIDByChatID: dict[str, int]
+
+
+class SiriusMsgDeliverableEventCapture(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    capturedAt: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    chatID: SiriusMsgChatID
+    containsMessageBody: bool
+    messageID: SiriusMsgMessageID
+    messageText: Optional[str] = None
+    rowID: int
 
 
 class SiriusMsgEditContent(BaseModel):
@@ -271,11 +598,17 @@ class SiriusMsgHealthComponentDetail(BaseModel):
     peerCredentialPolicy: Optional[str] = None
     peerCredentialsEnforced: Optional[bool] = None
     port: Optional[conint(ge=0, le=65535)] = None
+    richMessagingFeatures: Optional[list[str]] = None
+    richMessagingRemediation: Optional[str] = None
+    richMessagingState: Optional[str] = None
     tokenAgeDays: Optional[int] = None
+    tokenAuthenticationAvailable: Optional[bool] = None
     tokenCreatedAt: Optional[float] = Field(
         None,
         description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
     )
+    tokenMaintenanceDue: Optional[bool] = None
+    tokenRemediation: Optional[str] = None
     tokenStaleAfterDays: Optional[int] = None
     vmReachability: Optional[SiriusMsgVMReachabilityState] = None
 
@@ -309,6 +642,67 @@ class SiriusMsgHealthState(Enum):
     stopped = 'stopped'
 
 
+class SiriusMsgHistoryMessage(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    attachmentCount: conint(ge=0)
+    authorDisplayName: str
+    chatID: SiriusMsgChatID
+    handleID: Optional[SiriusMsgHandleID] = None
+    id: SiriusMsgMessageID
+    isFromMe: bool
+    isGroupChat: bool
+    replyToMessageID: Optional[SiriusMsgMessageID] = None
+    rowID: conint(ge=0, le=9007199254740991) = Field(
+        ...,
+        description='Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.',
+    )
+    sentAt: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    text: str
+    textTruncated: Optional[bool] = False
+
+
+class SiriusMsgHistoryPage(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    messages: list[SiriusMsgHistoryMessage]
+    nextBeforeRowID: Optional[conint(ge=0, le=9007199254740991)] = Field(
+        None,
+        description='Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.',
+    )
+    scannedRowCount: conint(ge=0)
+
+
+class SiriusMsgHistoryReadRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    beforeRowID: Optional[conint(ge=0, le=9007199254740991)] = Field(
+        None,
+        description='Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.',
+    )
+    chatID: SiriusMsgChatID
+    limit: conint(ge=1, le=100)
+
+
+class SiriusMsgHistorySearchRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    beforeRowID: Optional[conint(ge=0, le=9007199254740991)] = Field(
+        None,
+        description='Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.',
+    )
+    chatIDs: Optional[list[SiriusMsgChatID]] = Field(None, max_length=20)
+    limit: conint(ge=1, le=100)
+    query: constr(max_length=1024)
+
+
 class SiriusMsgImageRef(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -336,6 +730,18 @@ class SiriusMsgInboundEventKind(Enum):
     messageUnsent = 'messageUnsent'
     reaction = 'reaction'
     replyReference = 'replyReference'
+
+
+class SiriusMsgLocalConfigurationSnapshot(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    activityRetentionDays: int
+    allowlist: SiriusMsgAllowlist
+    connections: list[SiriusMsgConnectionProfile]
+    pythonAdapters: list[SiriusMsgPythonAdapterConfiguration]
+    richMessaging: Optional[SiriusMsgRichMessagingConfiguration] = None
+    vmAccessEnabled: bool
 
 
 class SiriusMsgMessageEditedEvent(BaseModel):
@@ -406,6 +812,24 @@ class SiriusMsgMessageUnsentEvent(BaseModel):
     )
 
 
+class SiriusMsgMessagingValidationEvidence(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    attachmentByteCount: Optional[int] = None
+    attachmentMIMEType: Optional[str] = None
+    attachmentSHA256: Optional[str] = None
+    capabilityDiagnostics: list[str]
+    confirmationState: Optional[SiriusMsgSendConfirmationState] = None
+    contentKind: SiriusMsgContentKind
+    diagnostics: list[str]
+    generatedPreviewRequested: bool
+    platformMessageID: Optional[str] = None
+    providerTransportsQueried: list[SiriusMsgTransport]
+    resolvedRichLinkURL: Optional[AnyUrl] = None
+    richLinkURL: Optional[AnyUrl] = None
+
+
 class SiriusMsgOutboundAttachment(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -415,6 +839,32 @@ class SiriusMsgOutboundAttachment(BaseModel):
     fileURL: AnyUrl
     mimeType: str
     sha256: str
+
+
+class SiriusMsgProcessIdentity(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    bundleIdentifier: Optional[str] = None
+    effectiveUserID: int
+    executablePath: str
+    processIdentifier: int
+    userID: int
+
+
+class SiriusMsgPythonAdapterConfiguration(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    adapterID: SiriusMsgAdapterID
+    enabled: bool
+    handlerFunction: str
+    handlerModule: str
+    includeMessageBody: bool
+    pythonPackagePath: str
+    supportsAttachments: bool
+    timeoutSeconds: float
+    workerCount: int
 
 
 class SiriusMsgReaction(Enum):
@@ -590,6 +1040,41 @@ class SiriusMsgReconnectPolicy(Enum):
     none = 'none'
 
 
+class SiriusMsgRecoveryValidationEvidence(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    ackedEventSuppressed: bool
+    ackOwnershipEnforced: bool
+    afterHealthState: Optional[SiriusMsgHealthState] = None
+    afterProcessIdentifier: Optional[int] = None
+    automationRecovered: bool
+    beforeHealthState: Optional[SiriusMsgHealthState] = None
+    beforeProcessIdentifier: Optional[int] = None
+    checkpoint: SiriusMsgValidationStep
+    completedAt: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    cursorAdvancedOnlyAfterAck: bool
+    diagnostics: list[str]
+    duplicateAckRejected: bool
+    fullDiskAccessRecovered: bool
+    messageIDs: list[SiriusMsgMessageID]
+    messagesApplicationRunning: bool
+    rowIDs: list[int]
+    socketAuthenticated: bool
+    startedAt: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    statusHeartbeatRecovered: bool
+    tokenReadable: bool
+    tokenReused: bool
+    unackedEventRedelivered: bool
+    vmProbeRecovered: bool
+
+
 class SiriusMsgReplyContent(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -643,6 +1128,41 @@ class SiriusMsgRichLinkKind(Enum):
     plain = 'plain'
 
 
+class SiriusMsgRichMessagingConfiguration(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    allowedFeatures: Optional[list[SiriusMsgFeature]] = None
+    enabled: bool
+    executablePath: str
+    nativeEnabled: Optional[bool] = None
+    provider: SiriusMsgRichMessagingProvider
+
+
+class SiriusMsgRichMessagingProvider(Enum):
+    imsg = 'imsg'
+    nativeAccessibility = 'nativeAccessibility'
+
+
+class SiriusMsgRuntimeFileIdentity(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: SiriusMsgRuntimeFileKind
+    mode: Optional[int] = None
+    ownerUserID: Optional[int] = None
+    path: str
+
+
+class SiriusMsgRuntimeFileKind(Enum):
+    directory = 'directory'
+    missing = 'missing'
+    other = 'other'
+    regularFile = 'regularFile'
+    socket = 'socket'
+    symlink = 'symlink'
+
+
 class SiriusMsgSchemaCapabilities(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -665,6 +1185,7 @@ class SiriusMsgSendRequest(BaseModel):
     accountID: Optional[str] = None
     chatID: SiriusMsgChatID
     content: Optional[SiriusMsgContent] = None
+    operationID: Optional[constr(max_length=128)] = None
     text: str
 
 
@@ -723,11 +1244,14 @@ class SiriusMsgServiceErrorCode(Enum):
     authFailed = 'authFailed'
     authRequired = 'authRequired'
     backpressure = 'backpressure'
+    historyUnavailable = 'historyUnavailable'
     internalError = 'internalError'
     invalidRequest = 'invalidRequest'
     malformedFrame = 'malformedFrame'
     peerCredentialsRejected = 'peerCredentialsRejected'
     protocolVersionUnsupported = 'protocolVersionUnsupported'
+    sendOperationConflict = 'sendOperationConflict'
+    sendOperationUnresolved = 'sendOperationUnresolved'
     sendRejected = 'sendRejected'
     subscriptionAlreadyActive = 'subscriptionAlreadyActive'
     tokenRotationFailed = 'tokenRotationFailed'
@@ -761,9 +1285,12 @@ class SiriusMsgServiceRequest(BaseModel):
         extra='forbid',
     )
     ack: Optional[SiriusMsgServiceAck] = None
+    allowedChatQuery: Optional[SiriusMsgAllowedChatQuery] = None
     allowlist: Optional[SiriusMsgAllowlist] = None
     attachmentFetch: Optional[SiriusMsgAttachmentFetchRequest] = None
     authToken: Optional[str] = None
+    historyRead: Optional[SiriusMsgHistoryReadRequest] = None
+    historySearch: Optional[SiriusMsgHistorySearchRequest] = None
     kind: SiriusMsgServiceRequestKind
     protocolVersion: Literal[1] = Field(..., description='SiriusMsg protocol version.')
     requestID: str
@@ -778,7 +1305,10 @@ class SiriusMsgServiceRequestKind(Enum):
     capabilities = 'capabilities'
     fetchAttachment = 'fetchAttachment'
     health = 'health'
+    listAllowedChats = 'listAllowedChats'
+    readHistory = 'readHistory'
     rotateAuthToken = 'rotateAuthToken'
+    searchHistory = 'searchHistory'
     send = 'send'
     subscribe = 'subscribe'
     updateAllowlist = 'updateAllowlist'
@@ -788,12 +1318,14 @@ class SiriusMsgServiceResponse(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
+    allowedChats: Optional[list[SiriusMsgAllowlistCandidate]] = None
     attachmentFile: Optional[SiriusMsgAttachmentFileReference] = None
     authTokenRotationResult: Optional[SiriusMsgAuthTokenRotationResult] = None
     capabilities: Optional[list[SiriusMsgCapability]] = None
     error: Optional[SiriusMsgServiceError] = None
     event: Optional[SiriusMsgServiceEvent] = None
     health: Optional[SiriusMsgHealth] = None
+    historyPage: Optional[SiriusMsgHistoryPage] = None
     kind: SiriusMsgServiceResponseKind
     protocolVersion: Literal[1] = Field(..., description='SiriusMsg protocol version.')
     requestID: Optional[str] = None
@@ -802,6 +1334,7 @@ class SiriusMsgServiceResponse(BaseModel):
 
 class SiriusMsgServiceResponseKind(Enum):
     acked = 'acked'
+    allowedChats = 'allowedChats'
     allowlistUpdated = 'allowlistUpdated'
     attachmentFile = 'attachmentFile'
     authTokenRotated = 'authTokenRotated'
@@ -810,6 +1343,7 @@ class SiriusMsgServiceResponseKind(Enum):
     error = 'error'
     event = 'event'
     health = 'health'
+    historyPage = 'historyPage'
     sendResult = 'sendResult'
     subscribed = 'subscribed'
 
@@ -819,6 +1353,11 @@ class SiriusMsgSubscriptionOptions(BaseModel):
         extra='forbid',
     )
     supportsAttachments: bool
+
+
+class SiriusMsgTranscriptScope(Enum):
+    connection = 'connection'
+    conversation = 'conversation'
 
 
 class SiriusMsgTransport(Enum):
@@ -864,10 +1403,96 @@ class SiriusMsgUnsupportedContent(BaseModel):
     reason: str
 
 
+class SiriusMsgVMGuestConfiguration(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    authToken: str
+    endpointHost: str
+    endpointPort: int
+    generatedAt: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    generatingBundleIdentifier: Optional[str] = None
+    generatingTeamIdentifier: Optional[str] = None
+    protocolVersion: int
+    tokenCreatedAt: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    tokenStaleAfterDays: int
+
+
 class SiriusMsgVMReachabilityState(Enum):
     reachable = 'reachable'
     unprobed = 'unprobed'
     unreachable = 'unreachable'
+
+
+class SiriusMsgValidationResult(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    bundleIdentifier: Optional[str] = None
+    deliverableEventCapture: Optional[SiriusMsgDeliverableEventCapture] = None
+    diagnostic: str
+    messagingEvidence: Optional[SiriusMsgMessagingValidationEvidence] = None
+    process: SiriusMsgProcessIdentity
+    recoveryEvidence: Optional[SiriusMsgRecoveryValidationEvidence] = None
+    signing: SiriusMsgCodeSigningIdentity
+    state: SiriusMsgValidationResultState
+    step: SiriusMsgValidationStep
+    teamIdentifier: Optional[str] = None
+    timestamp: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+
+
+class SiriusMsgValidationResultState(Enum):
+    failed = 'failed'
+    passed = 'passed'
+    skipped = 'skipped'
+
+
+class SiriusMsgValidationRun(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    agentProcess: Optional[SiriusMsgProcessIdentity] = None
+    appProcess: Optional[SiriusMsgProcessIdentity] = None
+    appSigning: Optional[SiriusMsgCodeSigningIdentity] = None
+    completedAt: Optional[float] = Field(
+        None,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+    id: str
+    privacySentinel: Optional[str] = None
+    results: list[SiriusMsgValidationResult]
+    startedAt: float = Field(
+        ...,
+        description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
+    )
+
+
+class SiriusMsgValidationStep(Enum):
+    automationProbe = 'automationProbe'
+    automationSendSmoke = 'automationSendSmoke'
+    capabilityHonesty = 'capabilityHonesty'
+    fullDiskAccessProbe = 'fullDiskAccessProbe'
+    messagesRestart = 'messagesRestart'
+    outboundAttachmentRows = 'outboundAttachmentRows'
+    outboundFileSendSmoke = 'outboundFileSendSmoke'
+    privacySentinel = 'privacySentinel'
+    richLinkSmoke = 'richLinkSmoke'
+    runtimeFiles = 'runtimeFiles'
+    serviceRestart = 'serviceRestart'
+    signedIdentity = 'signedIdentity'
+    sleepWake = 'sleepWake'
+    subscriberReconnect = 'subscriberReconnect'
+    vmExport = 'vmExport'
+    vmProbe = 'vmProbe'
 
 
 class SiriusmsgProtocolV1(BaseModel):
