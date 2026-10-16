@@ -9,6 +9,11 @@ Messages database access, the Messages send path, cursor state, ACK policy,
 durable queue, or send confirmation. It receives one sanitized turn and returns
 one decision.
 
+The configured timeout limits handler execution. Reporting a timeout waits for
+worker recovery, including SwiftPython's startup admission and replacement setup.
+A timeout soon after startup can therefore include the remaining two-second
+worker-start interval. Allow for recovery time when choosing an outer deadline.
+
 ## Minimal Handler
 
 ```python
