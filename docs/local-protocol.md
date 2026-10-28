@@ -92,6 +92,10 @@ Missing options default to `supportsAttachments: false`. This is additive and do
 
 Omitting `transport` preserves the original local behavior. Provider transports are sibling matrices; requesting `messagesForBusiness` or `managedRelay` does not change Store polling, local Automation dispatch, or the active service transport.
 
+## Chat Discovery Transport Labels
+
+Chat discovery's `serviceName` describes the latest known ordinary message transport, with stored chat metadata as a fallback when no message service is available. It is presentation and search metadata, not recipient capability or delivery confirmation. Service sorting and page cursors use that same value. The stored chat metadata still resolves `chatID`; a display label change never rewrites chat identity, sharing policy, or cursors.
+
 ## Rich Actions Opt-In
 
 Plain text receive/reply clients do not need to change. Richer clients, including
