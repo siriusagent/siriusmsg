@@ -7,17 +7,11 @@ protocol SDKs in this repository.
 
 ## Download
 
-Get the latest notarized DMG from the release page:
+Download the `*-installer.zip` asset from the [latest release](https://github.com/siriusagent/siriusmsg/releases/latest). Extract the ZIP, open the branded DMG, then drag SiriusMsg to Applications.
 
-```text
-https://github.com/siriusagent/siriusmsg/releases/latest
-```
-
-The latest release page is:
-
-```text
-https://github.com/siriusagent/siriusmsg/releases/latest
-```
+The ZIP preserves the DMG file's SiriusMsg icon in Finder. The raw `.dmg` is also
+available for direct download and Sparkle updates; it shows macOS's generic file
+icon before opening, and the same branded installer volume after opening.
 
 ## Requirements
 
@@ -76,11 +70,11 @@ TypeScript SDKs above.
 ## Verify Download
 
 ```sh
-shasum -a 256 SiriusMsg-notarized.dmg
+shasum -a 256 SiriusMsg-0.2.0-build.24-installer.zip
 ```
 
-Compare the output with the checksum printed in the matching GitHub Release
-notes.
+Compare the output with the matching entry in `SHA256SUMS.txt` from the same
+GitHub Release.
 
 ## Security
 
