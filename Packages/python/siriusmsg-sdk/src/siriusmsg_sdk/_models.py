@@ -5,7 +5,16 @@ from __future__ import annotations
 from enum import Enum
 from typing import Literal, Optional
 
-from pydantic import AnyUrl, BaseModel, ConfigDict, Field, RootModel, conint, constr
+from pydantic import (
+    AnyUrl,
+    BaseModel,
+    ConfigDict,
+    Field,
+    RootModel,
+    confloat,
+    conint,
+    constr,
+)
 
 
 class SiriusMsgAccessibilityPermission(BaseModel):
@@ -112,9 +121,12 @@ class SiriusMsgAgentConnection(BaseModel):
 
 
 class SiriusMsgAgentControlCommand(Enum):
+    beginSiriusConnection = 'beginSiriusConnection'
     beginSleepWakeCheckpoint = 'beginSleepWakeCheckpoint'
     beginValidationRun = 'beginValidationRun'
+    cancelSiriusConnection = 'cancelSiriusConnection'
     clearAdapterReview = 'clearAdapterReview'
+    completeSiriusConnection = 'completeSiriusConnection'
     completeSleepWakeCheckpoint = 'completeSleepWakeCheckpoint'
     createConnection = 'createConnection'
     diagnoseOutboundAttachmentRows = 'diagnoseOutboundAttachmentRows'
@@ -169,6 +181,7 @@ class SiriusMsgAgentControlRequest(BaseModel):
     richLinkTitle: Optional[str] = None
     richLinkURL: Optional[AnyUrl] = None
     richMessagingConfiguration: Optional[SiriusMsgRichMessagingConfiguration] = None
+    siriusSetup: Optional[SiriusMsgSiriusSetup] = None
     validationRunID: Optional[str] = None
     vmAccessEnabled: Optional[bool] = None
 
@@ -189,6 +202,7 @@ class SiriusMsgAgentControlResponse(BaseModel):
     error: Optional[str] = None
     health: Optional[SiriusMsgHealth] = None
     restartRequired: Optional[bool] = None
+    siriusPairing: Optional[SiriusMsgSiriusPairingStatus] = None
     status: Optional[SiriusMsgAgentRuntimeStatus] = None
     validationResult: Optional[SiriusMsgValidationResult] = None
     validationRun: Optional[SiriusMsgValidationRun] = None
@@ -474,6 +488,7 @@ class SiriusMsgConnectionProfile(BaseModel):
     repliesAllowed: bool
     setupConfigurationBackupURL: Optional[AnyUrl] = None
     setupConfigurationURL: Optional[AnyUrl] = None
+    sirius: Optional[SiriusMsgSiriusConnection] = None
 
 
 class SiriusMsgContent(BaseModel):
@@ -547,6 +562,7 @@ class SiriusMsgFeature(Enum):
     miniAppCard = 'miniAppCard'
     sendEdit = 'sendEdit'
     sendFile = 'sendFile'
+    sendFormattedText = 'sendFormattedText'
     sendMessageEffect = 'sendMessageEffect'
     sendReaction = 'sendReaction'
     sendRichLink = 'sendRichLink'
@@ -1183,10 +1199,12 @@ class SiriusMsgSendRequest(BaseModel):
         extra='forbid',
     )
     accountID: Optional[str] = None
+    adapterReplyTo: Optional[SiriusMsgServiceAck] = None
     chatID: SiriusMsgChatID
     content: Optional[SiriusMsgContent] = None
     operationID: Optional[constr(max_length=128)] = None
     text: str
+    textFormat: Optional[TextFormat] = None
 
 
 class SiriusMsgSendResult(BaseModel):
@@ -1348,6 +1366,36 @@ class SiriusMsgServiceResponseKind(Enum):
     subscribed = 'subscribed'
 
 
+class SiriusMsgSiriusConnection(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    callerID: str
+    endpointDescriptorURL: AnyUrl
+    maximumEventAgeSeconds: Optional[confloat(ge=0.0)] = None
+    workspaceDirectory: AnyUrl
+
+
+class SiriusMsgSiriusPairingStatus(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    connectionID: str
+    state: State
+
+
+class SiriusMsgSiriusSetup(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    displayName: str
+    endpointDescriptorURL: AnyUrl
+    includedChatIDs: list[SiriusMsgChatID]
+    repliesAllowed: bool
+    sourceConnectionID: Optional[str] = None
+    workspaceDirectory: AnyUrl
+
+
 class SiriusMsgSubscriptionOptions(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -1497,3 +1545,13 @@ class SiriusMsgValidationStep(Enum):
 
 class SiriusmsgProtocolV1(BaseModel):
     pass
+
+
+class State(Enum):
+    connected = 'connected'
+    pending = 'pending'
+
+
+class TextFormat(Enum):
+    markdown = 'markdown'
+    plain = 'plain'

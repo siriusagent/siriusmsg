@@ -213,9 +213,12 @@
     },
     "SiriusMsgAgentControlCommand" : {
       "enum" : [
+        "beginSiriusConnection",
         "beginSleepWakeCheckpoint",
         "beginValidationRun",
+        "cancelSiriusConnection",
         "clearAdapterReview",
+        "completeSiriusConnection",
         "completeSleepWakeCheckpoint",
         "createConnection",
         "diagnoseOutboundAttachmentRows",
@@ -313,6 +316,9 @@
         "richMessagingConfiguration" : {
           "$ref" : "#/$defs/SiriusMsgRichMessagingConfiguration"
         },
+        "siriusSetup" : {
+          "$ref" : "#/$defs/SiriusMsgSiriusSetup"
+        },
         "validationRunID" : {
           "type" : "string"
         },
@@ -372,6 +378,9 @@
         },
         "restartRequired" : {
           "type" : "boolean"
+        },
+        "siriusPairing" : {
+          "$ref" : "#/$defs/SiriusMsgSiriusPairingStatus"
         },
         "status" : {
           "$ref" : "#/$defs/SiriusMsgAgentRuntimeStatus"
@@ -952,6 +961,9 @@
         "setupConfigurationURL" : {
           "format" : "uri",
           "type" : "string"
+        },
+        "sirius" : {
+          "$ref" : "#/$defs/SiriusMsgSiriusConnection"
         }
       },
       "required" : [
@@ -1098,6 +1110,7 @@
         "miniAppCard",
         "sendEdit",
         "sendFile",
+        "sendFormattedText",
         "sendMessageEffect",
         "sendReaction",
         "sendRichLink",
@@ -2518,6 +2531,9 @@
         "accountID" : {
           "type" : "string"
         },
+        "adapterReplyTo" : {
+          "$ref" : "#/$defs/SiriusMsgServiceAck"
+        },
         "chatID" : {
           "$ref" : "#/$defs/SiriusMsgChatID"
         },
@@ -2529,6 +2545,13 @@
           "type" : "string"
         },
         "text" : {
+          "type" : "string"
+        },
+        "textFormat" : {
+          "enum" : [
+            "markdown",
+            "plain"
+          ],
           "type" : "string"
         }
       },
@@ -2831,6 +2854,89 @@
         "subscribed"
       ],
       "type" : "string"
+    },
+    "SiriusMsgSiriusConnection" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "callerID" : {
+          "type" : "string"
+        },
+        "endpointDescriptorURL" : {
+          "format" : "uri",
+          "type" : "string"
+        },
+        "maximumEventAgeSeconds" : {
+          "minimum" : 0,
+          "type" : "number"
+        },
+        "workspaceDirectory" : {
+          "format" : "uri",
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "endpointDescriptorURL",
+        "workspaceDirectory",
+        "callerID"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgSiriusPairingStatus" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "connectionID" : {
+          "type" : "string"
+        },
+        "state" : {
+          "enum" : [
+            "connected",
+            "pending"
+          ],
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "connectionID",
+        "state"
+      ],
+      "type" : "object"
+    },
+    "SiriusMsgSiriusSetup" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "displayName" : {
+          "type" : "string"
+        },
+        "endpointDescriptorURL" : {
+          "format" : "uri",
+          "type" : "string"
+        },
+        "includedChatIDs" : {
+          "items" : {
+            "$ref" : "#/$defs/SiriusMsgChatID"
+          },
+          "type" : "array",
+          "uniqueItems" : true
+        },
+        "repliesAllowed" : {
+          "type" : "boolean"
+        },
+        "sourceConnectionID" : {
+          "type" : "string"
+        },
+        "workspaceDirectory" : {
+          "format" : "uri",
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "endpointDescriptorURL",
+        "workspaceDirectory",
+        "displayName",
+        "includedChatIDs",
+        "repliesAllowed"
+      ],
+      "type" : "object"
     },
     "SiriusMsgSubscriptionOptions" : {
       "additionalProperties" : false,

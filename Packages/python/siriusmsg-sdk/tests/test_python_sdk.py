@@ -43,6 +43,18 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 GOLDEN_DIR = REPO_ROOT / "Schema" / "golden"
 
 
+def test_text_presentation_is_explicit_and_literal_opt_out_survives_wire() -> None:
+    for text_format in ("plain", "markdown"):
+        request = SiriusMsgSendRequest(chatID="fixture", text="**hello**", textFormat=text_format)
+        encoded = request.model_dump(mode="json", exclude_none=True)
+        assert encoded["textFormat"] == text_format
+        assert encoded["text"] == "**hello**"
+        assert SiriusMsgSendRequest.model_validate(encoded) == request
+    assert SiriusMsgSendRequest(chatID="fixture", text="literal").textFormat is None
+    with pytest.raises(ValidationError):
+        SiriusMsgSendRequest.model_validate({"chatID": "fixture", "text": "hello", "textFormat": "html"})
+
+
 def _canonical(value: dict) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
 

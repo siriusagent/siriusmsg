@@ -3,11 +3,12 @@
 This is the reference surface for Python agent runtimes that consume SiriusMsg.
 It is the right layer for Sirius, Hermes, OpenClaw, and similar Python stacks.
 
-The bundled Python package, `siriusmsg`, is the adapter authoring surface hosted
-by `SiriusMsgAgent` through SwiftPython. Python code does not own socket auth,
-Messages database access, the Messages send path, cursor state, ACK policy,
-durable queue, or send confirmation. It receives one sanitized turn and returns
-one decision.
+`SiriusMsgKit` remains the Swift client library for the local service. The
+bundled Python package, `siriusmsg`, is the adapter authoring surface hosted by
+`SiriusMsgAgent` through SwiftPython. Python code does not own the socket auth,
+Messages database, AppleEvents send path, cursor state, ACK policy, durable
+queue, or send confirmation. It receives one sanitized turn and returns one
+decision.
 
 The configured timeout limits handler execution. Reporting a timeout waits for
 worker recovery, including SwiftPython's startup admission and replacement setup.
@@ -48,11 +49,11 @@ Handlers return:
 
 ## Boundary Rules
 
-Adapters must not read the Messages database, call AppleEvents, access Keychain
-items, or connect directly to the SiriusMsg service socket. They must not log
-message bodies. SiriusMsg owns allowlist enforcement before delivery, ACK after
-the configured runner policy, reply sending through Messages.app, and read-only
-send confirmation.
+Adapters must not read `the Messages database`, call AppleEvents, access
+Keychain items, or connect directly to the SiriusMsg service socket. They must
+not log message bodies. SiriusMsg owns allowlist enforcement before delivery,
+ACK after the configured runner policy, reply sending through Messages.app, and
+read-only send confirmation.
 
 The SDK intentionally exposes data, not power:
 
@@ -88,7 +89,7 @@ async def handle(ctx):
 ```
 
 Keep routing metadata small. The adapter may pass `chat_id`, `message.id`, and
-attempt information to the consumer runtime, but it should not invent a parallel
+attempt information to the consumer runtime, but it should not invent a private
 Messages abstraction or expose handles beyond what the user-facing agent needs.
 
 ## Hermes-Style Runtime
@@ -192,7 +193,7 @@ Adapters decide how to project fetched bytes into their target runtime. SiriusMs
 does not parse documents, OCR images, create provider-specific content blocks, or
 send provider-specific rich payloads from Python. Outbound file send is owned by
 the native service capability matrix and should be requested through the local
-protocol SDKs, not by giving hooks or adapters AppleEvents access.
+protocol or `SiriusMsgKit`, not by giving hooks or adapters AppleEvents access.
 
 ## Error Policy
 
@@ -207,8 +208,10 @@ may already have left Messages.app. Swift owns that blocked-review state.
 
 ## Verification
 
-The hosted SDK contract is covered by the SiriusMsg app release gate with real
-SwiftPython-hosted Python fixtures against the SiriusMsg adapter host, including:
+The hosted SDK contract is covered in
+`Tests/SiriusMsgHooksTests/SiriusMsgHooksTests.swift`. The tests execute real
+SwiftPython-hosted Python fixtures against `SiriusMsgPythonAdapterHost`,
+including:
 
 - generic decision normalization
 - Swift async callbacks for health, capabilities, and attachment fetch

@@ -28,6 +28,25 @@ import {
   type SiriusMsgServiceResponse,
 } from "../src/index.js";
 
+test("text presentation preserves Markdown source and literal opt out", () => {
+  for (const textFormat of ["plain", "markdown"]) {
+    expect(() =>
+      validateDefinition("SiriusMsgSendRequest", {
+        chatID: "fixture",
+        text: "**hello**",
+        textFormat,
+      }),
+    ).not.toThrow();
+  }
+  expect(() =>
+    validateDefinition("SiriusMsgSendRequest", {
+      chatID: "fixture",
+      text: "**hello**",
+      textFormat: "html",
+    }),
+  ).toThrow();
+});
+
 test("generated send operation ID is recoverable after transport failure", async () => {
   const client = SiriusMsgClient.loopback({ port: 1, authToken: "unused" });
   try {

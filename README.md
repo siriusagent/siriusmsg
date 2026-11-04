@@ -32,6 +32,8 @@ offer an all-chats mode in v1.
 
 ## SDK
 
+For the built-in Sirius connection, follow [Connect Sirius](docs/sirius-connection.md).
+
 Public integration surfaces in this repository:
 
 - [Local protocol](docs/local-protocol.md): authenticated newline-delimited JSON
@@ -70,7 +72,7 @@ TypeScript SDKs above.
 ## Verify Download
 
 ```sh
-shasum -a 256 SiriusMsg-0.2.0-build.24-installer.zip
+shasum -a 256 SiriusMsg-0.2.0-build.25-installer.zip
 ```
 
 Compare the output with the matching entry in `SHA256SUMS.txt` from the same

@@ -35,9 +35,12 @@ export type SiriusMsgAgentID = "claude" | "codex" | "deepseek" | "hermes" | "ope
  * via the `definition` "SiriusMsgAgentControlCommand".
  */
 export type SiriusMsgAgentControlCommand =
+  | "beginSiriusConnection"
   | "beginSleepWakeCheckpoint"
   | "beginValidationRun"
+  | "cancelSiriusConnection"
   | "clearAdapterReview"
+  | "completeSiriusConnection"
   | "completeSleepWakeCheckpoint"
   | "createConnection"
   | "diagnoseOutboundAttachmentRows"
@@ -104,6 +107,7 @@ export type SiriusMsgFeature =
   | "miniAppCard"
   | "sendEdit"
   | "sendFile"
+  | "sendFormattedText"
   | "sendMessageEffect"
   | "sendReaction"
   | "sendRichLink"
@@ -507,6 +511,7 @@ export interface SiriusMsgAgentControlRequest {
   richLinkTitle?: string;
   richLinkURL?: string;
   richMessagingConfiguration?: SiriusMsgRichMessagingConfiguration;
+  siriusSetup?: SiriusMsgSiriusSetup;
   validationRunID?: string;
   vmAccessEnabled?: boolean;
 }
@@ -552,6 +557,7 @@ export interface SiriusMsgConnectionProfile {
   repliesAllowed: boolean;
   setupConfigurationBackupURL?: string;
   setupConfigurationURL?: string;
+  sirius?: SiriusMsgSiriusConnection;
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
@@ -564,6 +570,16 @@ export interface SiriusMsgCodexConnection {
   socketURL: string;
   threadID: string;
   transcriptScope?: SiriusMsgTranscriptScope;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgSiriusConnection".
+ */
+export interface SiriusMsgSiriusConnection {
+  callerID: string;
+  endpointDescriptorURL: string;
+  maximumEventAgeSeconds?: number;
+  workspaceDirectory: string;
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
@@ -593,6 +609,18 @@ export interface SiriusMsgRichMessagingConfiguration {
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgSiriusSetup".
+ */
+export interface SiriusMsgSiriusSetup {
+  displayName: string;
+  endpointDescriptorURL: string;
+  includedChatIDs: SiriusMsgChatID[];
+  repliesAllowed: boolean;
+  sourceConnectionID?: string;
+  workspaceDirectory: string;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
  * via the `definition` "SiriusMsgAgentControlResponse".
  */
 export interface SiriusMsgAgentControlResponse {
@@ -608,6 +636,7 @@ export interface SiriusMsgAgentControlResponse {
   error?: string;
   health?: SiriusMsgHealth;
   restartRequired?: boolean;
+  siriusPairing?: SiriusMsgSiriusPairingStatus;
   status?: SiriusMsgAgentRuntimeStatus;
   validationResult?: SiriusMsgValidationResult;
   validationRun?: SiriusMsgValidationRun;
@@ -771,6 +800,14 @@ export interface SiriusMsgRecipeTriggerRuntimeCounts {
   failedCount: number;
   sentCount: number;
   skippedCount: number;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgSiriusPairingStatus".
+ */
+export interface SiriusMsgSiriusPairingStatus {
+  connectionID: string;
+  state: "connected" | "pending";
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
@@ -1363,21 +1400,12 @@ export interface SiriusMsgSchemaCapabilities {
  */
 export interface SiriusMsgSendRequest {
   accountID?: string;
+  adapterReplyTo?: SiriusMsgServiceAck;
   chatID: SiriusMsgChatID;
   content?: SiriusMsgContent;
   operationID?: string;
   text: string;
-}
-/**
- * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
- * via the `definition` "SiriusMsgSendResult".
- */
-export interface SiriusMsgSendResult {
-  accepted: boolean;
-  confirmationState: SiriusMsgSendConfirmationState;
-  diagnosticCode?: string;
-  platformMessageID?: string;
-  resolvedContent?: SiriusMsgContent;
+  textFormat?: "markdown" | "plain";
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
@@ -1390,6 +1418,17 @@ export interface SiriusMsgServiceAck {
    * Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.
    */
   rowID: number;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgSendResult".
+ */
+export interface SiriusMsgSendResult {
+  accepted: boolean;
+  confirmationState: SiriusMsgSendConfirmationState;
+  diagnosticCode?: string;
+  platformMessageID?: string;
+  resolvedContent?: SiriusMsgContent;
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
