@@ -1,28 +1,31 @@
 # Connect Sirius
 
-SiriusMsg build 25 adds a native Sirius connection. Use a Sirius version with
-Connected Apps support, then open SiriusMsg → Connections → Add connection →
-Sirius. Choose the workspace and chats, and approve SiriusMsg in Sirius →
-Settings → Permissions & Security → Connected Apps.
+Use a Sirius version with Connected Apps support. Open SiriusMsg → Connections →
+Add connection → Sirius. Choose a workspace and the chats to share, then approve
+SiriusMsg in Sirius → Settings → Permissions & Security → Connected Apps.
+Add another connection for each additional workspace. Use **Repair access** on
+a saved connection to restore access to that workspace.
 
 SiriusMsg owns Messages access, chat permissions and reply confirmation. Sirius
 owns the agent runtime, models, tools, approvals and persistent conversations.
-The connection does not start another Sirius engine or move model credentials
-into SiriusMsg.
 
-Upgrading an existing Sirius channel waits for its worker to stop and preserves
-conversation identities, permissions and review history. A busy turn must finish
-first; uncertain worker ownership may require restarting Sirius. The old report
-remains visible until the handover activates. Afterward, one registered Sirius
-connection provides Connection, Permissions and Activity tabs, with access to
-retained previous review items.
+Open a chat and look under **Shared with**. **Selected** marks the connection
+that handles new messages. Click **Use** beside another connection to switch.
+Switching back resumes the existing conversation in that workspace. Accepted
+work retains its original reply owner and remains subject to the chat’s
+current permissions.
 
-Choose which connection answers each chat in Shared with. New messages follow
-that selection; accepted work retains its original reply owner. New messages can
-continue after another item needs review. Discarding review items neither
-repeats the model turn nor sends its old reply.
+Conversations shared with Sirius can use the group name or direct chat address
+as a title. With Contacts access, SiriusMsg can use the matching contact name
+for a shared direct chat.
 
-Updating the app does not automatically approve a new connection or replay old
-Messages. Readiness, send confirmation and recipient delivery remain separate
-facts. This remains an alpha release; the release notes state its qualification
+On Sirius versions that support steering, a follow-up from the same sender can
+interrupt and redirect an active turn in the same chat. Follow-ups apply in
+Messages order. On older versions the messages queue as separate turns.
+
+New messages can continue after another item needs review. Discarding the
+review item does not rerun that turn or resend its old reply. Updating the app
+does not automatically approve connections or replay old Messages.
+
+This remains an alpha release. See the latest release notes for qualification
 limits.
