@@ -652,6 +652,9 @@ async def _test_live_client_subscribes_acks_and_fetches_attachment(info: Harness
         message = event.message
         assert message.id.root == info["messageID"]
         assert message.text == "hello sdk"
+        assert message.replyToMessageID is not None and message.replyToMessageID.root == "sdk-parent"
+        assert message.replyQuote is not None and message.replyQuote.text == "Previous SDK message"
+        assert not message.replyQuote.textTruncated
         assert message.attachments[0].id.root == info["attachmentID"]
         await client.ack(SiriusMsgServiceAck(messageID=message.id, chatID=message.chatID, rowID=message.rowID))
     finally:

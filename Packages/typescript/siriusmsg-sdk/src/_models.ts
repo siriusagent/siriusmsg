@@ -1236,12 +1236,21 @@ export interface SiriusMsgMessageEvent {
    * Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.
    */
   receivedAt: number;
+  replyQuote?: SiriusMsgReplyQuote;
   replyToMessageID?: SiriusMsgMessageID;
   /**
    * Int64 ROWID constrained to the JavaScript safe-integer range for generated SDKs.
    */
   rowID: number;
   text: string;
+}
+/**
+ * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
+ * via the `definition` "SiriusMsgReplyQuote".
+ */
+export interface SiriusMsgReplyQuote {
+  text: string;
+  textTruncated: boolean;
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema
@@ -1491,6 +1500,7 @@ export interface SiriusMsgServiceRequest {
  */
 export interface SiriusMsgSubscriptionOptions {
   supportsAttachments: boolean;
+  supportsReplyQuotes?: boolean;
 }
 /**
  * This interface was referenced by `SiriusMsgProtocolV1`'s JSON-Schema

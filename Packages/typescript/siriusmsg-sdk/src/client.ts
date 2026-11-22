@@ -523,6 +523,7 @@ export class SiriusMsgClient {
           kind: "subscribe",
           subscriptionOptions: {
             supportsAttachments: opts.supportsAttachments ?? false,
+            supportsReplyQuotes: true,
           },
         });
         const subscribed = await connection.readResponse();

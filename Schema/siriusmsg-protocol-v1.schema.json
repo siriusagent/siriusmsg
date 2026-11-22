@@ -1601,6 +1601,9 @@
           "description" : "Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.",
           "type" : "number"
         },
+        "replyQuote" : {
+          "$ref" : "#/$defs/SiriusMsgReplyQuote"
+        },
         "replyToMessageID" : {
           "$ref" : "#/$defs/SiriusMsgMessageID"
         },
@@ -2331,6 +2334,22 @@
       ],
       "type" : "object"
     },
+    "SiriusMsgReplyQuote" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "text" : {
+          "type" : "string"
+        },
+        "textTruncated" : {
+          "type" : "boolean"
+        }
+      },
+      "required" : [
+        "text",
+        "textTruncated"
+      ],
+      "type" : "object"
+    },
     "SiriusMsgReplyReferenceEvent" : {
       "additionalProperties" : false,
       "properties" : {
@@ -2942,6 +2961,9 @@
       "additionalProperties" : false,
       "properties" : {
         "supportsAttachments" : {
+          "type" : "boolean"
+        },
+        "supportsReplyQuotes" : {
           "type" : "boolean"
         }
       },

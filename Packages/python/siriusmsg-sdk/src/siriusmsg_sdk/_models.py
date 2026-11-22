@@ -799,6 +799,7 @@ class SiriusMsgMessageEvent(BaseModel):
         ...,
         description='Swift JSONEncoder default Date encoding: seconds since 2001-01-01T00:00:00Z.',
     )
+    replyQuote: Optional[SiriusMsgReplyQuote] = None
     replyToMessageID: Optional[SiriusMsgMessageID] = None
     rowID: conint(ge=0, le=9007199254740991) = Field(
         ...,
@@ -1097,6 +1098,14 @@ class SiriusMsgReplyContent(BaseModel):
     )
     targetMessageID: SiriusMsgMessageID
     text: str
+
+
+class SiriusMsgReplyQuote(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    text: str
+    textTruncated: bool
 
 
 class SiriusMsgReplyReferenceEvent(BaseModel):
@@ -1401,6 +1410,7 @@ class SiriusMsgSubscriptionOptions(BaseModel):
         extra='forbid',
     )
     supportsAttachments: bool
+    supportsReplyQuotes: Optional[bool] = None
 
 
 class SiriusMsgTranscriptScope(Enum):

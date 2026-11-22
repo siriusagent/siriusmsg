@@ -461,7 +461,10 @@ class SiriusMsgClient:
                         protocolVersion=PROTOCOL_VERSION,
                         requestID=request_id("subscribe"),
                         kind="subscribe",
-                        subscriptionOptions=SiriusMsgSubscriptionOptions(supportsAttachments=supports_attachments),
+                        subscriptionOptions=SiriusMsgSubscriptionOptions(
+                            supportsAttachments=supports_attachments,
+                            supportsReplyQuotes=True,
+                        ),
                     )
                 )
                 subscribed = await connection.read_response()

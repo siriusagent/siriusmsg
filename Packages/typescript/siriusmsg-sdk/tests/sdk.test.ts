@@ -979,6 +979,8 @@ describe("@siriusmsg/sdk", () => {
         expect(message).toMatchObject({
           id: info.messageID,
           text: "hello sdk",
+          replyToMessageID: "sdk-parent",
+          replyQuote: { text: "Previous SDK message", textTruncated: false },
         });
         if (!message) {
           throw new Error("expected a message event");
