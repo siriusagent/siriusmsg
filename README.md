@@ -72,7 +72,7 @@ TypeScript SDKs above.
 ## Verify Download
 
 ```sh
-shasum -a 256 SiriusMsg-0.2.0-build.28-installer.zip
+shasum -a 256 SiriusMsg-0.2.0-build.29-installer.zip
 ```
 
 Compare the output with the matching entry in `SHA256SUMS.txt` from the same
